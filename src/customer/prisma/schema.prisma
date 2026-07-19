@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  previewFeatures = ["views"]
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+enum Role {
+  user
+  admin
+}
+model User {
+  id         String @id @default(uuid())
+  first_name String
+  last_name  String
+  email String @unique
+  photo String?
+  password String
+  active Boolean @default(true)
+  password_change_at DateTime? 
+  role Role @default(user)
+  created_at DateTime @default(now())
+  is_verified Boolean @default(false)
+}
+
+model login_failed {
+  id String @id @default(uuid())
+  email String @unique
+  login_attempts Int
+  login_locked_until Int
+}
+
+model Token {
+  id String @id @default(uuid())
+  email String @unique
+  token String 
+  expires_at Int
+  created_at DateTime @default(now())
+}
+model OTP {
+  id String @id @default(uuid())
+  email String
+  code Int @unique
+  created_at DateTime @default(now())
+  expires_at DateTime 
+}
+
+model EmailOutbox {
+  id String @id @default(uuid())
+  aggregatetype String
+  aggregateid String
+  eventtype String
+  payload Json
+
+}
+
+view current_users {
+  id String
+  email String @unique
+  first_name String
+  last_name String
+  photo String?
+  password String
+  password_change_at DateTime? 
+  is_verified Boolean
+  role Role
+}
+
+
+model processed_events {
+  id String @id @default(uuid())
+  event_id String
+  processed_at DateTime
+}

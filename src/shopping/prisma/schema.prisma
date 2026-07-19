@@ -1,0 +1,127 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+model Carts {
+  id String @id @default(uuid())
+  user_id String @unique
+  cart_items Cart_Items[]
+
+  // user User @relation(fields: [user_id], references: [id])
+  
+}
+
+model Wishlists {
+  id String @id @default(uuid())
+  user_id String @unique
+  wishlist_items Wishlist_items[]
+
+  // user User @relation(fields: [user_id], references: [id])
+  
+}
+model Wishlist_items {
+  id String @id @default(uuid())
+  wishlist_id String 
+  product_id String
+
+  wishlist Wishlists @relation(fields: [wishlist_id], references: [id])
+  // product Product @relation(fields: [product_id], references: [id])
+
+  // @@id([cart_id, product_id])
+  @@unique([wishlist_id, product_id])
+}
+
+model Cart_Items {
+  id String @id @default(uuid())
+  cart_id String 
+  product_id String
+  quantity Int
+  price Decimal
+
+  cart Carts @relation(fields: [cart_id], references: [id])
+  // product Product @relation(fields: [product_id], references: [id])
+
+  // @@id([cart_id, product_id])
+  @@unique([cart_id, product_id])
+
+}
+
+enum Status {
+  pending
+  successful
+  cancelled
+  failed
+}
+
+enum Payment_status {
+  pending
+  successful
+  unsuccessful
+  cancelled
+}
+
+model Orders {
+  id String @id @default(uuid())
+  user_id String
+  products Order_items[]
+  status Status @default(pending)
+  transaction Transactions[]
+  payment_status Payment_status @default(pending)
+  total_price Decimal
+  payment_url String?
+  created_at DateTime @default(now())
+
+  // user User @relation(fields: [user_id], references: [id])
+}
+model Order_items {
+  id String @id @default(uuid())
+  order_id String
+  product_id String
+  quantity Int
+  price Decimal
+
+  order Orders @relation(fields: [order_id], references: [id])
+}
+
+enum transaction_status {
+  pending
+  successful
+  failed
+  cancelled
+}
+model Transactions {
+  id String @id @default(uuid())
+  created_at DateTime @default(now())
+  amount Decimal
+  order_id String
+  status transaction_status @default(pending)
+  update_at DateTime @updatedAt
+
+  order Orders @relation(fields: [order_id], references: [id])
+
+}
+
+model PaymentOutox {
+  id String @id @default(uuid())
+  aggregatetype String
+  aggregateid String
+  eventtype String
+  payload Json
+}
+
+model processed_events {
+  id String @id @default(uuid())
+  event_id String
+  processed_at DateTime
+}

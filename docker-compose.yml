@@ -1,0 +1,14 @@
+version: '3.8'
+networks:
+  ecommerce:
+    driver: overlay
+    driver_opts:
+      encrypted: "true"
+volumes:
+  ecommerce-data:
+    
+services:
+  products:
+    image: products:1.0
+
+    

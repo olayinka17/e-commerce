@@ -1,0 +1,19 @@
+{
+  "name": "kafkabroker",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rimraf dist && npx tsc"
+  },
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@enterprise/kafka-common": "*",
+    "kafkajs": "^2.2.4",
+    "rimraf": "^6.1.3"
+  }
+}

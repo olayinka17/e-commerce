@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package inventoryPackage;
+
+service Inventory {
+    rpc addMoreStock(UpdateParams) returns (return_value);
+}
+
+message UpdateParams {
+  string product_id = 1;
+  int32 quantity = 2;
+  string reference_type = 3;
+  string reference_id = 4;
+  string type = 5;
+}
+
+message return_value {
+    bool success = 1;
+  
+}

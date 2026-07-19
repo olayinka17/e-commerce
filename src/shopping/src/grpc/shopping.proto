@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package AdminPackage;
+
+service Admin {
+  rpc totalOrders(queryParams) returns (Orders);
+  rpc totalRevenue(now_to) returns (revenue);
+  // rpc pendingOrders(paginate) returns (Orders);
+  rpc recentTransactions(queryParams) returns (Transactions);
+
+}
+
+message queryParams {
+  optional int32 limit = 1;
+  optional string beforeTimestamp = 2;
+  optional string status = 3;
+
+}
+
+
+message Order {
+  string id = 1;
+  string user_id = 2;
+  string status = 3;
+  string payment_status =4;
+  int32 total_price = 5;
+  string created_at = 6;
+}
+
+message Orders {
+  repeated Order orders = 1;
+  string nextCursor = 2;
+}
+
+message Transaction {
+  string id = 1;
+  string status = 2;
+  string created_at = 3;
+  string order_id = 4;
+  int32 amount = 5;
+  string updated_at = 6;
+}
+
+message Transactions {
+  repeated Transaction transactions = 1;
+  string nextCursor = 2;
+}
+
+message  now_to {
+  string now = 1;
+  string to = 2;
+}
+
+message revenue {
+    int32 total_amount = 1;
+}

@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Inventory {
+  id String @id @default(uuid())
+  product_id String @unique
+  available_quantity Int
+  reserved_quantity Int
+  physical_stock Int
+  archived_quantity Int
+  is_active Boolean @default(true)
+  updated_at DateTime @updatedAt
+  created_at DateTime @default(now())
+}
+
+enum movement_types {
+  purchase
+  sale
+  return_in
+  return_out
+  adjustment
+  damage
+  loss
+}
+model Inventory_movement {
+  id String @id @default(uuid())
+  product_id String
+  type movement_types
+  quantity Int
+  reference_type String
+  reference_id String
+  created_at DateTime @default(now())
+}
+
+enum reserved_status {
+  pending
+  confirmed
+  cancelled
+  expired
+  expired_processing
+}
+
+model Inventory_reservation {
+  id String @id @default(uuid())
+  product_id String
+  order_id String
+  quantity Int
+  expires_at BigInt
+  status reserved_status @default(pending)
+  created_at DateTime @default(now())
+  // @@unique([product_id, order_id, status])
+}
+
+model processed_events {
+  id String @id @default(uuid())
+  event_id String
+  processed_at DateTime
+}
