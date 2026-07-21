@@ -13,7 +13,7 @@ RUN npm run build --workspace=orchestrator
 
 FROM node:22-alpine AS runtime
 WORKDIR /app
-COPY --from=builder /app/src/orchestrator/dist ./dist/
-COPY --from=builder /app/node_modules ./node_modules/
+COPY --from=builder /app/src/orchestrator/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
 
 CMD ["node", "dist/bootstrap.js"]

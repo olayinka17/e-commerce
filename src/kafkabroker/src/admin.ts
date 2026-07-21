@@ -1,27 +1,6 @@
 import { Kafka, type Admin } from "kafkajs";
 import { TOPIC_CONFIGS } from "./topics.js";
 
-const kafka = new Kafka({
-  clientId: "admin-app",
-  brokers: [
-    "localhost:9092",
-    "localhost:9093",
-    "localhost:9094",
-    "localhost:9095",
-  ],
-});
-
-// export const createKafka = (clientId) => {
-//   new Kafka({
-//     clientId,
-//     brokers: [
-//       "localhost:9092",
-//       "localhost:9093",
-//       "localhost:9094",
-//       "localhost:9095",
-//     ],
-//   });
-// };
 
 class KafkaAdmin {
   private admin: Admin;

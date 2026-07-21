@@ -5,7 +5,12 @@ process.on("uncaughtException", (err) => {
   console.log("UNCAUGHT EXCEPTION. Shutting down...");
   process.exit(1);
 });
-const kafkaService = new KafkaService("orchestrator-service");
+const kafkaService = new KafkaService({
+  clientId: "orchestrator-service",
+  brokers: process.env.KAFKA_BROKERS
+    ? process.env.KAFKA_BROKERS.split(",")
+    : [],
+});
 
 await kafkaService.connect();
 

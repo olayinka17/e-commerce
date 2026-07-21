@@ -17,11 +17,8 @@ export const subscribeEvent = async (kafkaService: KafkaService) => {
   await consumer.run({
     autoCommit: false,
     eachMessage: async ({ topic, partition, message }) => {
-      console.log(topic);
-      console.log(message.headers);
       switch (topic) {
         case Topics.ORDER_CREATED:
-          console.log("topic");
           kafkaService.publish(Topics.INVENTORY_RESERVE, [
             {
               value: JSON.parse(message.value!.toString()),
