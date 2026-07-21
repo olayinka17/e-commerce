@@ -11,24 +11,17 @@ export class ShoppingController {
   constructor() {
     (async () => {
       await subscribeEvent(this.shoppingService);
-      // try {
-      //   await subscribeEvent(this.shoppingService);
-      // } catch (error) {
-
-      // }
     })();
   }
-
-  // createShopping = async (req: Request, res: Response) => {
-  //     const
-  // }
 
   // orders
   createOrder = async (req: Request, res: Response) => {
     const { id, email } = req.user;
-    //console.log(id, email)
 
-    const {order, response} = await this.shoppingService.CreateNewOrder(id, email);
+    const { order, response } = await this.shoppingService.CreateNewOrder(
+      id,
+      email,
+    );
 
     res.status(201).json({
       status: "success",
@@ -61,6 +54,19 @@ export class ShoppingController {
     const order_id = req.params.id as string;
 
     const order = await this.shoppingService.GetOrderbyId(order_id);
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        order,
+      },
+    });
+  };
+
+  getOrderStatus = async (req: Request, res: Response) => {
+    const order_id = req.params.id as string;
+
+    const order = await this.shoppingService.getOrderStatus(order_id);
 
     res.status(200).json({
       status: "success",

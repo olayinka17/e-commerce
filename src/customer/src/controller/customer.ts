@@ -52,7 +52,6 @@ export const verifyOTP = CatchAsync<
   const { email, code } = req.body;
 
   const newUser = await verifyOTPService({ email, code });
-  console.log("sksk")
   sendCreatedToken(newUser, 200, res);
 });
 
@@ -68,8 +67,6 @@ export const login = CatchAsync<
   const { email, password } = req.body;
 
   const user = await loginService({ email, password });
-
-  console.log("iisi")
   sendCreatedToken(user, 200, res);
 });
 
@@ -162,12 +159,10 @@ export const validateUser = CatchAsync<{}, {}, {}, {}>(
     if (!token) {
       return next(new CustomError("please login", 401));
     }
-    console.log("token", token);
 
     const decoded = await validate_user(token);
 
     res.set("x_user", JSON.stringify(decoded));
-    // res.set("x-user-role") // set the user role
     res.status(200).end();
   },
 );

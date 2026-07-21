@@ -4,7 +4,7 @@ import { Network } from "testcontainers";
 import type { ServiceError } from "@grpc/grpc-js";
 import { KafkaContainer } from "@testcontainers/kafka";
 import { PostgreSqlContainer } from "@testcontainers/postgresql";
-import { Kafka, logLevel , type Consumer, type Producer } from "kafkajs";
+import { Kafka, logLevel, type Consumer, type Producer } from "kafkajs";
 import { Topics } from "@enterprise/kafka-common";
 import { v4 as uuidv4 } from "uuid";
 import { startServer, stopServer } from "../server.js";
@@ -62,7 +62,6 @@ describe("inventory test", () => {
   let first_order_id: string;
   let second_order_id: string;
 
-  
   beforeAll(
     async () => {
       // Initializing shared Docker network
@@ -130,29 +129,30 @@ describe("inventory test", () => {
 
       first_order_id = uuidv4();
       second_order_id = uuidv4();
-      
-      await new Promise((resolve) => setTimeout(resolve, 100000));
+
       await startServer(false);
+      await new Promise((resolve) => setTimeout(resolve, 100000));
     },
     50 * 60 * 1000,
   );
 
-  afterAll(async () => {
-    if (producer) await producer.disconnect();
-    if (kafkaContainer) await kafkaContainer.stop();
-    if (postgresqlContainer) await postgresqlContainer.stop();
-    await prisma.inventory.deleteMany();
-    await prisma.inventory_reservation.deleteMany();
-    await prisma.inventory_movement.deleteMany();
-    await prisma.$disconnect();
-    await network.stop();
-    await stopServer();
-  }, 50 * 60 * 1000);
+  afterAll(
+    async () => {
+      if (producer) await producer.disconnect();
+      if (kafkaContainer) await kafkaContainer.stop();
+      if (postgresqlContainer) await postgresqlContainer.stop();
+      await prisma.inventory.deleteMany();
+      await prisma.inventory_reservation.deleteMany();
+      await prisma.inventory_movement.deleteMany();
+      await prisma.$disconnect();
+      await network.stop();
+      await stopServer();
+    },
+    50 * 60 * 1000,
+  );
 
   it("should process product created outbox event", async () => {
     const product_id = uuidv4();
-    console.log(product_id);
-
     await producer.send({
       topic: "outbox.event.products",
       messages: [
@@ -233,12 +233,15 @@ describe("inventory test", () => {
   });
 
   it("should process inventory reserve events", async () => {
-    const consumer = kafkaClient.consumer({
+    const consumer: Consumer = kafkaClient.consumer({
       groupId: `inventory-service-test?${Date.now()}`,
     });
     await consumer.connect();
 
-    await consumer.subscribe({ topic: Topics.INVENTORY_RESERVED });
+    await consumer.subscribe({
+      topic: Topics.INVENTORY_RESERVED,
+      fromBeginning: true,
+    });
     const inventory = await prisma.inventory.findMany({
       where: { is_active: true },
     });
@@ -364,12 +367,14 @@ describe("inventory test", () => {
   }, 10000);
 
   it("should return  inventory failed events because it has been archived", async () => {
-
-    const consumer = kafkaClient.consumer({
+    const consumer: Consumer = kafkaClient.consumer({
       groupId: `inventory-service-test:${Date.now()}`,
     });
     await consumer.connect();
-    await consumer.subscribe({ topic: Topics.INVENTORY_FAILED });
+    await consumer.subscribe({
+      topic: Topics.INVENTORY_FAILED,
+      fromBeginning: true,
+    });
     const inventory = await prisma.inventory.findFirst({
       where: { is_active: false },
     });
@@ -405,7 +410,6 @@ describe("inventory test", () => {
 
     await consumer.run({
       eachMessage: async ({ message }) => {
-       
         receivedKafkaMessages.push(JSON.parse(message.value!.toString()));
         receivedKafkaHeaders.push(
           message.headers?.event_id?.toString() as string,
@@ -457,7 +461,6 @@ describe("inventory test", () => {
   }, 18000);
 
   it("should process product unarchived outbox event", async () => {
-
     const inventory = await prisma.inventory.findMany({
       where: { is_active: false },
     });
@@ -495,11 +498,14 @@ describe("inventory test", () => {
   }, 10000);
 
   it("should failed the database constraint because available quantity is zero", async () => {
-    const consumer = kafkaClient.consumer({
+    const consumer: Consumer = kafkaClient.consumer({
       groupId: `inventory-service-test|:${Date.now()}`,
     });
     await consumer.connect();
-    await consumer.subscribe({ topic: Topics.INVENTORY_FAILED });
+    await consumer.subscribe({
+      topic: Topics.INVENTORY_FAILED,
+      fromBeginning: true,
+    });
 
     const inventory = await prisma.inventory.findMany({
       where: { is_active: true },
@@ -534,8 +540,7 @@ describe("inventory test", () => {
     const receivedKafkaHeaders: string[] = [];
 
     await consumer.run({
-      eachMessage: async ({ topic, message }) => {
-        console.log(topic);
+      eachMessage: async ({ message }) => {
         receivedKafkaMessages.push(JSON.parse(message.value!.toString()));
         receivedKafkaHeaders.push(
           message.headers?.event_id?.toString() as string,
@@ -572,12 +577,12 @@ describe("inventory test", () => {
         expect(processed?.event_id).toBe(event_id);
         expect(processed).toHaveProperty("event_id");
 
-        expect(receivedKafkaMessages.length).toBe(1);
-        expect(receivedKafkaMessages[0]).toEqual({
+        expect(receivedKafkaMessages.length).toBe(2);
+        expect(receivedKafkaMessages[1]).toEqual({
           message: `Database Check Failed! Constraint: [chk_available_quantity_positive]. Raw Input: (${order.products[0]?.product_id as string})`,
           product_id: order.products[0]?.product_id as string,
         });
-        expect(receivedKafkaHeaders.length).toBe(1);
+        expect(receivedKafkaHeaders.length).toBe(2);
       },
       50000,
       200,
@@ -638,7 +643,7 @@ describe("inventory test", () => {
   }, 10000);
 
   it("should process inventory reserve events", async () => {
-    const consumer = kafkaClient.consumer({
+    const consumer: Consumer = kafkaClient.consumer({
       groupId: `inventory-service-test${Date.now()}`,
     });
     await consumer.connect();

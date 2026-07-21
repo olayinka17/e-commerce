@@ -1,6 +1,6 @@
 import app from "./app.js";
 import "dotenv/config";
-import { boostrap } from "./utils/bootstrap.js";
+import { bootstrap } from "./utils/bootstrap.js";
 // import { KafkaService } from "@enterprise/kafka-common";
 // const kafkaService = new KafkaService("admin-service");
 
@@ -9,7 +9,7 @@ import { boostrap } from "./utils/bootstrap.js";
 
 // export default kafkaService;
 
-await boostrap()
+await bootstrap()
 
 const PORT = process.env.PORT;
 

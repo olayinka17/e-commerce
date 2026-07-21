@@ -4,6 +4,10 @@ import { prisma } from "./prisma.js";
 import { sendWelcome } from "./email.js";
 
 export const subscribeEvent = async () => {
+  try {
+  } catch (err: any) {
+    console.log("err:", err);
+  }
   const consumer: Consumer = kafkaService.createConsumer("email-service");
   await consumer.connect();
   await consumer.subscribe({ topic: "outbox.event.email" });

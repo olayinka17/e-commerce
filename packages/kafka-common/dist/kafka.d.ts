@@ -7,7 +7,7 @@ export declare class KafkaService {
     private kafka;
     private producer;
     private consumer;
-    constructor(config: KafkaConfig);
+    constructor(kafkaconfig: KafkaConfig);
     connect(): Promise<void>;
     disconnect(): Promise<void>;
     publish(topic: string, messages: Array<{

@@ -49,17 +49,6 @@ export class Observer {
     this.service = service;
   }
 
-  // async totalOrders(
-  //   call: ServerUnaryCall<PaginateI, OrdersI>,
-  //   callback: sendUnaryData<OrdersI>,
-  // ) {
-  //   const orders: OrdersI = await this.service.total_orders({
-  //     limit: Number(call.request.limit),
-  //     beforeTimestamp: Number(call.request.beforeTimestamp),
-  //     status: call.request.status,
-  //   });
-  //   callback(null, orders);
-  // }
 
   totalOrders = async (
     call: ServerUnaryCall<
@@ -72,17 +61,6 @@ export class Observer {
   
   };
 
-  // async totalRevenue(
-  //   call: ServerUnaryCall<now_toI, revenueI>,
-  //   callback: sendUnaryData<revenueI>,
-  // ) {
-  //   const revenue: revenueI = await this.service.total_revenue(
-  //     call.request.now,
-  //     call.request.to,
-  //   );
-
-  //   callback(null, revenue);
-  // }
 
   totalRevenue = async (
     call: ServerUnaryCall<now_toI, revenueI>,
@@ -90,20 +68,6 @@ export class Observer {
     const result = await this.service.total_revenue(call);
     return result;
   };
-
-  // async recentTransactions(
-  //   call: ServerUnaryCall<PaginateI, TransactionsI>,
-  //   callback: sendUnaryData<TransactionsI>,
-  // ) {
-  //   const transactions = await this.service.recent_transactions({
-  //     limit: Number(call.request.limit),
-  //     beforeTimestamp: Number(call.request.beforeTimestamp),
-  //     status: call.request.status,
-  //   });
-
-  //   callback(null, transactions);
-  // }
-
   recentTransactions = async (
     call: ServerUnaryCall<
       PaginateI,

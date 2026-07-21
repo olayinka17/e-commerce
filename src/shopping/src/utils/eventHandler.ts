@@ -4,7 +4,6 @@ import { prisma } from "./prisma.js";
 import { Topics } from "@enterprise/kafka-common";
 import { ShoppingService } from "../service/shopping.js";
 
-
 export const subscribeEvent = async (shopping: ShoppingService) => {
   try {
     const consumer: Consumer = kafkaService.createConsumer("shopping-service");
@@ -12,7 +11,6 @@ export const subscribeEvent = async (shopping: ShoppingService) => {
     await consumer.subscribe({ topic: Topics.PAYMENT_PROCESS });
     await consumer.subscribe({ topic: Topics.INVENTORY_FAILED });
     await consumer.subscribe({ topic: Topics.ORDER_FAILED_RETRY });
-    
 
     await consumer.run({
       autoCommit: false,
@@ -39,7 +37,6 @@ export const subscribeEvent = async (shopping: ShoppingService) => {
           ]);
           return;
         }
-        console.log(`Processing event ${event_id} for topic ${topic}`);
         switch (topic) {
           case Topics.PAYMENT_PROCESS:
             try {
@@ -75,17 +72,17 @@ export const subscribeEvent = async (shopping: ShoppingService) => {
                 offset: (Number(message.offset) + 1).toString(),
               },
             ]);
-            console.log(`${payload.message} for ${payload.product_id}`)
-          // throw new CustomError(
-          //   `${payload.message} for ${payload.product_id}`,
-          //   403,
-          // );
-          break;
+            console.log(`${payload.message} for ${payload.product_id}`);
+            // throw new CustomError(
+            //   `${payload.message} for ${payload.product_id}`,
+            //   403,
+            // );
+            break;
           case Topics.ORDER_FAILED_RETRY:
             const retry_at = Number(message.headers?.retry_after?.toString());
 
             if (Date.now() < retry_at) {
-              console.log(Date.now())
+              console.log(Date.now());
               return;
             }
 
@@ -102,7 +99,7 @@ export const subscribeEvent = async (shopping: ShoppingService) => {
                       retry: String(attempt + 1),
                       max_retry: max_retry.toString(),
                       retry_after: String(Date.now() + backoff),
-                      err: lastError?.toString()
+                      err: lastError?.toString(),
                     },
                   },
                 ],
@@ -111,14 +108,14 @@ export const subscribeEvent = async (shopping: ShoppingService) => {
 
             //DLQ
 
-              const dlePayload = {
+            const dlePayload = {
               value: payload,
               error: lastError,
               retries_exhausted: max_retry,
               sent_at: new Date().toISOString(),
             };
 
-            console.log(`${message.headers?.original_topic?.toString()}_DLQ`)
+            console.log(`${message.headers?.original_topic?.toString()}_DLQ`);
             await kafkaService.publish(
               `${message.headers?.original_topic?.toString()}_DLQ`,
               [{ key: payload.order.id, value: dlePayload }],
@@ -133,11 +130,11 @@ export const subscribeEvent = async (shopping: ShoppingService) => {
       },
     });
   } catch (error: any) {
-    console.log(`event handler err ${error}`)
+    console.log(`event handler err ${error}`);
     //error thrown from the stock not enough
     if (error.statuscode === 403) {
-      //send the error to the user as push notification 
-      console.log(error.message)
+      //send the error to the user as push notification
+      console.log(error.message);
     }
   }
 };

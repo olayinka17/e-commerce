@@ -39,13 +39,6 @@ export const signUpService = async ({
   email,
   password,
 }: SignUpI): Promise<object> => {
-  // try and remove this and handle duplicate error
-  // const existingUser = await prisma.user.findUnique({ where: { email } });
-
-  // if (existingUser) {
-  //   throw new CustomError("An account with this email already exists", 400);
-  // }
-
   const hashpassword: string = await bcrypt.hash(password, 10);
   const newUser = await prisma.user.create({
     data: {
@@ -62,13 +55,6 @@ export const signUpService = async ({
   const redisKey: string = `customer-service:OTP:${email}`;
 
   await redis.set(redisKey, bcrypt.hashSync(otp.toString()), "EX", 300);
-  // await redis.hset(redisKey, {
-  //   OTP: otp.code,
-  //   expires_at: otp.expiry,
-  // });
-  // await redis.expire(redisKey, 60 * 11);
-
-  // email service
   await sendUserEmail(email, otp);
   console.log(`OTP for ${email}: ${otp}`); // For testing purposes only, remove in production
 
@@ -83,7 +69,6 @@ export const verifyOTPService = async ({
   const Otpcode: string = String(await redis.get(redisKey));
 
   if (!Otpcode) {
-    console.log("kjsjsj")
     throw new CustomError("Invalid or expired OTP", 400);
   }
 
@@ -91,7 +76,6 @@ export const verifyOTPService = async ({
 
   if (!isValid) throw new CustomError("Invalid or Expired OTP", 400);
   await redis.del(redisKey);
-  console.log("jdjdjd")
 
   const user = await prisma.$transaction(async (tx) => {
     const user = await tx.user.update({
@@ -114,12 +98,6 @@ export const verifyOTPService = async ({
     const { password: _, ...safeUser } = user;
     return safeUser;
   });
-  // const user = await prisma.user.update({
-  //   where: { email },
-  //   data: { is_verified: true },
-  // });
-
-  console.log(user)
   return user;
 };
 
@@ -142,10 +120,13 @@ export const resendOtpService = async (
   const cooldownKey = `otp:cooldown:${email}`;
 
   const exists = await redis.get(cooldownKey);
-  const coolttl = await redis.ttl(cooldownKey)
+  const coolttl = await redis.ttl(cooldownKey);
 
   if (exists) {
-    throw new CustomError(`Please wait before requesting another OTP. retry after ${coolttl}`, 429);
+    throw new CustomError(
+      `Please wait before requesting another OTP. retry after ${coolttl}`,
+      429,
+    );
   }
 
   await redis.set(cooldownKey, "1", "EX", 30);
@@ -156,8 +137,8 @@ export const resendOtpService = async (
   let otpTosend: string;
 
   if (!existingOtp) {
-    await redis.del(rateKey)
-    await redis.del(cooldownKey)
+    await redis.del(rateKey);
+    await redis.del(cooldownKey);
     throw new CustomError(
       "Invalid request state. please request a new OTP",
       400,
@@ -181,7 +162,6 @@ export const resendOtpService = async (
     await sendUserEmail(email, Number(otpTosend));
   }
 
-  console;
   return { message: "OTP sent successfully" };
 };
 
@@ -215,22 +195,6 @@ export const forgotPasswordService = async (email: string): Promise<object> => {
 
   if (!user) throw new CustomError("Invalid Credentials", 400);
 
-  // const resetToken = crypto.randomBytes(32).toString("hex");
-
-  // const resetTokenHash = crypto
-  //   .createHash("sha256")
-  //   .update(resetToken)
-  //   .digest("hex");
-
-  // const expiry = Date.now() + 10 * 60 * 1000;
-  // await prisma.token.create({
-  //   data: {
-  //     email,
-  //     token: resetTokenHash,
-  //     expires_at: expiry,
-  //   },
-  // });
-
   const otp = generateOTP();
 
   const redisKey: string = `customer-service:OTP:${email}`;
@@ -240,8 +204,6 @@ export const forgotPasswordService = async (email: string): Promise<object> => {
   await sendResetEmail(email, otp);
   console.log(`OTP for ${email}: ${otp}`); // For testing purposes only, remove in production
   return { message: "OTP sent successfully" };
-
-  // email service
 };
 
 export const resetPasswordService = async (
@@ -249,13 +211,6 @@ export const resetPasswordService = async (
   code: string,
   email: string,
 ): Promise<UserI> => {
-  // const hashToken = crypto.createHash("sha256").update(token).digest("hex");
-
-  // const record = await prisma.token.findFirst({
-  //   where: {
-  //     token: hashToken,
-  //   },
-  // });
   const redisKey: string = `customer-service:OTP:${email}`;
   const Otpcode: string = String(await redis.get(redisKey));
 
@@ -364,8 +319,6 @@ export const validate_user = async (token: string) => {
   if (!currentUser) {
     throw new CustomError("Invalid Request", 400);
   }
-
-  //const time = currentUser?.password_change_at?.getTime() / 1000
   if (
     currentUser.password_change_at &&
     currentUser?.password_change_at?.getTime() / 1000 > decoded.iat!
@@ -378,7 +331,4 @@ export const validate_user = async (token: string) => {
     email: currentUser.email,
     role: currentUser.role,
   };
-  //const {password: _, ...user} = currentUser!
-
-  // return user
 };

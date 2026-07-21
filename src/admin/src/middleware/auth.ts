@@ -10,9 +10,7 @@ export const protect = CatchAsync<{}, any, {}, {}>(
     }
 
     const userInfo: string = req.headers["x-user"] as string;
-    //console.log(userInfo)
     user = JSON.parse(userInfo);
-    //console.log(user)
     req.user = user;
     next();
   },

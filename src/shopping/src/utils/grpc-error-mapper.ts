@@ -1,5 +1,5 @@
 import { type ServiceError, Metadata, status } from "@grpc/grpc-js";
-import { GrpcException } from "./GrpcError.js"
+import { GrpcException } from "./GrpcError.js";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 
 const handleDupicateFiedDb = (
@@ -57,13 +57,11 @@ export function toGrpcError(err: unknown): ServiceError {
   }
 
   if (err instanceof PrismaClientKnownRequestError) {
-    //let error: any = Object.create(err)
     if (err.code === "P2005") return handleCastErrorDb(err, metadata);
     if (err.code === "P2006") return handleValidationErrorDb(err, metadata);
     if (err.code === "P2002") return handleDupicateFiedDb(err, metadata);
-    //return err;
   }
-  console.log(err)
+  console.log(err);
 
   return {
     name: "Internal",

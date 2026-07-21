@@ -30,7 +30,6 @@ export class Observer {
     // }
     addMoreStock = async (call: ServerUnaryCall<params, response>) => {
         const result = await this.service.add_more_stock(call)
-        console.log(result)
         return result
     }
 }

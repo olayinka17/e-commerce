@@ -1,5 +1,9 @@
 import { prisma } from "../utils/prisma.js";
-import { Status, transaction_status, type Transactions } from "../generated/prisma/client.js";
+import {
+  Status,
+  transaction_status,
+  type Transactions,
+} from "../generated/prisma/client.js";
 import { payment, paystackWebhook } from "../utils/transaction.js";
 import type { KafkaService } from "@enterprise/kafka-common";
 import { kafkaService } from "../utils/kafka.js";
@@ -12,12 +16,7 @@ import type {
   OrdersWhereInput,
 } from "../generated/prisma/internal/prismaNamespace.js";
 import { getProduct, getProducts } from "../utils/RpcClientFunctions.js";
-import type {
-  now_toI,
-  OrdersI,
-  PaginateI,
-  TransactionsI,
-} from "../utils/RpcServerfunctions.js";
+import type { now_toI, PaginateI } from "../utils/RpcServerfunctions.js";
 import CustomError from "../utils/CustomError.js";
 import type { ServerUnaryCall } from "@grpc/grpc-js";
 import { APIFeatures } from "../utils/ApiFeatures.js";
@@ -103,14 +102,6 @@ export class ShoppingService {
     this.kafkaservice = kafkaService;
   }
 
-  // async Cart(user_id: string) {
-  //   return this.prisma.cart.findFirst({ where: { user_id } });
-  // }
-
-  //   async GetCartById(user_id: string) {
-  //     return this.prisma.cart
-  //   }
-
   async ManageCart(
     user_id: string,
     product: Partial<ProductI>,
@@ -166,6 +157,9 @@ export class ShoppingService {
               },
             },
           },
+          include: {
+            cart_items: true,
+          },
         });
         return newCart;
       }
@@ -177,11 +171,8 @@ export class ShoppingService {
   async addToCart(user_id: string, product_id: string, qty: number) {
     // grab product from product service throug RPC
     const productResponse: ProductI | null = await getProduct(product_id);
-
-    console.log(productResponse);
     if (productResponse && productResponse.id === product_id) {
       const data = await this.ManageCart(user_id, productResponse, qty, false);
-      console.log(data);
       return data;
     }
 
@@ -213,7 +204,6 @@ export class ShoppingService {
         } else {
           const newWishlist = await tx.wishlist_items.create({
             data: {
-              // wishlist_id: wishlist.id,
               product_id: productId,
               wishlist: {
                 connect: { id: wishlist.id },
@@ -266,12 +256,9 @@ export class ShoppingService {
     }
 
     const cart_items = cart?.cart_items;
-    console.log(cart_items);
 
     if (Array.isArray(cart_items)) {
       const ids = cart_items.map(({ product_id }) => product_id);
-
-      console.log(ids);
       //perform RPC call to get the products info from product service and format the response
 
       const productResponse: { items: ProductI[] } = await getProducts(ids);
@@ -444,14 +431,11 @@ export class ShoppingService {
           return prev + curr.price * qty;
         }, 0);
 
-        const cartItems = 
-          cart.cart_items.map((item) => ({
-            product_id: item.product_id,
-            quantity: item.quantity,
-            price: item.price.toNumber(),
-          }))
-        ;
-        console.log(cartItems);
+        const cartItems = cart.cart_items.map((item) => ({
+          product_id: item.product_id,
+          quantity: item.quantity,
+          price: item.price.toNumber(),
+        }));
 
         const idempotency_key = createHash("sha256")
           .update(user_id as string)
@@ -459,14 +443,11 @@ export class ShoppingService {
           .update(total_amount.toString())
           .digest("hex");
 
-        console.log(idempotency_key);
-
         // store idempotency key in redis
         const redisKey: string = `shopping-service:idemkey:${idempotency_key}`;
         const userKey: string = `orders:user${user_id}:*`;
         const is_exist = await redis.hgetall(redisKey);
         const correlation_id = uuidv4();
-        console.log(is_exist);
         if (Object.keys(is_exist).length === 0) {
           order = await this.prisma.$transaction(async (tx) => {
             const newOrder = await tx.orders.create({
@@ -499,21 +480,16 @@ export class ShoppingService {
             return neworder;
           });
 
-          // console.log(order.id);
           await redis.hset(redisKey, {
             order_id: order?.id,
             amount: total_amount.toString(),
             status: order?.status,
           });
-          console.log("ososo");
 
           await redis.expire(redisKey, 60 * 60);
           // invalidate
           await invalidateCacheByPattern(userKey);
           await invalidateCacheByPattern(`orders:admin:*`);
-          // return {
-          //   order,
-          // };
         } else {
           //set the status at the webhook
           if (is_exist.status === "successful") {
@@ -608,19 +584,11 @@ export class ShoppingService {
 
             resolve(data);
           });
-          // subscriber.subscribe(channelName, async (message) => {
-          //   clearTimeout(timeout);
-
-          //   const data = JSON.parse(message);
-          //   await subscriber.unsubscribe(channelName);
-          //   subscriber.disconnect();
-          //   resolve(data.paymentURL);
-          // });
         });
 
         // order created event to inventory
         const event_id = uuidv4();
-        console.log(order);
+
         await this.kafkaservice.publish(Topics.ORDER_CREATED, [
           {
             value: { order, email, correlation_id },
@@ -630,15 +598,8 @@ export class ShoppingService {
           },
         ]);
 
-        // console.log("off")
-
         const response = await waitForURL;
         return { order, response };
-
-        // move this to payment webhook success handler
-        // await this.prisma.cart_Items.deleteMany({
-        //   where: { cart_id: cart.id },
-        // });
       }
       return {};
     }
@@ -661,8 +622,6 @@ export class ShoppingService {
   ): Promise<revenueI> {
     const to = call.request.to;
     const now = call.request.now;
-    console.log("to", to);
-    console.log("now", now);
     const total: Array<{ sum: number }> = await this.prisma.$queryRaw`
     SELECT SUM(amount) 
     FROM "Transactions"
@@ -674,21 +633,28 @@ export class ShoppingService {
     };
   }
 
-  async total_orders(call: ServerUnaryCall<PaginateI, { orders: OrderIA[]; nextCursor: string | null }>): Promise<{ orders: OrderIA[]; nextCursor: string | null }> {
+  async total_orders(
+    call: ServerUnaryCall<
+      PaginateI,
+      { orders: OrderIA[]; nextCursor: string | null }
+    >,
+  ): Promise<{ orders: OrderIA[]; nextCursor: string | null }> {
     const allowedFields: Status[] = ["pending", "successful", "cancelled"];
 
-    const newStatus: Status[]  = [];
-    console.log("call.request", call.request);
-    if (call.request.status !== 'undefined') {
+    const newStatus: Status[] = [];
+    if (call.request.status !== "undefined") {
       const formatted: any[] = call.request.status?.split(",");
       formatted.forEach((el) => {
         if (allowedFields.includes(el)) newStatus.push(el);
       });
     }
-    console.log(new Date(Number(call.request.beforeTimestamp)))
 
     const where = {
-      created_at: { lte: new Date(Number(call.request.beforeTimestamp) ?? Date.now()) as Date },
+      created_at: {
+        lte: new Date(
+          Number(call.request.beforeTimestamp) ?? Date.now(),
+        ) as Date,
+      },
       ...(newStatus.length !== 0 && { status: { in: newStatus } }),
     };
 
@@ -705,7 +671,6 @@ export class ShoppingService {
       },
       orderBy: { created_at: "desc" },
     });
-    console.log(orders)
 
     if (orders.length === 0) {
       return {
@@ -714,42 +679,20 @@ export class ShoppingService {
       };
     }
 
-    //const sorted = total.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
-
     return {
       orders: orders.map((order) => ({
         ...order,
-        created_at: String(new Date(order.created_at))
+        created_at: String(new Date(order.created_at)),
       })),
-      nextCursor: String(orders[orders.length - 1]?.created_at?.getTime()) || null,
+      nextCursor:
+        String(orders[orders.length - 1]?.created_at?.getTime()) || null,
     };
   }
-
-  // async pending_orders(limit = 20, beforeTimestamp = Date.now()) {
-  //   const orders: OrderI[] = await this.prisma.orders.findMany({
-  //     where: {
-  //       status: "pending",
-  //       created_at: { lte: new Date(beforeTimestamp) },
-  //     },
-  //     take: limit,
-  //     orderBy: { created_at: "desc" },
-  //   });
-
-  //   if (orders.length === 0) {
-  //     return {
-  //       orders: [],
-  //       nextCursor: null,
-  //     };
-  //   }
-
-  //   return {
-  //     orders,
-  //     nextCursor: orders[orders.length - 1]?.created_at.getTime() || null,
-  //   };
-  // }
-
   async recent_transactions(
-    call: ServerUnaryCall<PaginateI, { transactions: TransactionI[]; nextCursor: string | null }>,
+    call: ServerUnaryCall<
+      PaginateI,
+      { transactions: TransactionI[]; nextCursor: string | null }
+    >,
   ): Promise<{ transactions: TransactionI[]; nextCursor: string | null }> {
     const allowedFields: transaction_status[] = [
       "pending",
@@ -757,31 +700,33 @@ export class ShoppingService {
       "failed",
     ];
 
-    console.log("call.request", call.request);
     const newStatus: transaction_status[] = [];
-    if (call.request.status !== 'undefined') {
+    if (call.request.status !== "undefined") {
       const formatted: any[] = call.request.status?.split(",");
-      console.log(formatted)
       formatted.forEach((el) => {
         if (allowedFields.includes(el)) newStatus.push(el);
       });
     }
 
-    
     const where = {
-      created_at: { lte: new Date(Number(call.request.beforeTimestamp) ?? Date.now()) as Date},
+      created_at: {
+        lte: new Date(
+          Number(call.request.beforeTimestamp) ?? Date.now(),
+        ) as Date,
+      },
       ...(newStatus.length !== 0 && { status: { in: newStatus } }),
     };
-    const transactions: Transactions[] = await this.prisma.transactions.findMany({
-      where,
-      take: call.request.limit ?? 20,
-      orderBy: { created_at: "desc" },
-    });
+    const transactions: Transactions[] =
+      await this.prisma.transactions.findMany({
+        where,
+        take: call.request.limit ?? 20,
+        orderBy: { created_at: "desc" },
+      });
 
     if (transactions.length === 0) {
       return {
         transactions: [],
-        nextCursor: "null"
+        nextCursor: "null",
       };
     }
 
@@ -792,9 +737,26 @@ export class ShoppingService {
         update_at: String(new Date(transaction.update_at)),
       })),
       nextCursor:
-        String(transactions[transactions.length - 1]?.created_at.getTime()) || null,
+        String(transactions[transactions.length - 1]?.created_at.getTime()) ||
+        null,
     };
   }
 
-  // async SubscribeEvent()
+  async getOrderStatus(id: string) {
+    const order = await this.prisma.orders.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        status: true,
+        payment_url: true,
+      },
+    });
+
+    if (!order) {
+      throw new CustomError("Invalid Order", 404);
+    }
+
+    return order;
+  }
 }

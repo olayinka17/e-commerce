@@ -7,7 +7,7 @@ export let ProductClient: Awaited<ReturnType<typeof startPrductsGrpcClient>>;
 export let InventoryClient: Awaited<
   ReturnType<typeof startInventoryGrpcClient>
 >;
-export async function boostrap() {
+export async function bootstrap() {
   client = await startGrpcclient();
   ProductClient = await startPrductsGrpcClient();
   InventoryClient = await startInventoryGrpcClient();

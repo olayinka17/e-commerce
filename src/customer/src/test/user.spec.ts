@@ -12,9 +12,6 @@ const connectionString = `${process.env.DATABASE_URL}`;
 const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ adapter });
 
-
-
-
 describe("user endpoints", () => {
   beforeAll(async () => {
     const hashedPassword = bcrypt.hashSync("123456789", 10);
@@ -46,7 +43,10 @@ describe("user endpoints", () => {
 
     expect(response.body).toHaveProperty("status", "success");
     expect(response.body).toHaveProperty("data");
-    expect(response.body.data).toHaveProperty("message", "OTP sent successfully");
+    expect(response.body.data).toHaveProperty(
+      "message",
+      "OTP sent successfully",
+    );
     await redis.del("customer-service:OTP:ola@example.com");
   });
 
@@ -71,35 +71,27 @@ describe("user endpoints", () => {
     const Otpcode: string = String(await redis.get(redisKey));
     console.log(Otpcode);
     expect(Otpcode).toBe("null");
-
   });
 
   it("should fail and reject an expired otp", async () => {
-
     const mockOtp = generateOTP();
-    // const expiredTime = new Date(Date.now() - 1000);
     const hashedOtp = bcrypt.hashSync(mockOtp.toString(), 10);
 
     const redisKey: string = `customer-service:OTP:test@example.com`;
 
     await redis.multi().set(redisKey, hashedOtp).expire(redisKey, -1).exec();
-
-    console.log("idoo")
     const response = await request(app).post("/api/v1/users/verify-otp").send({
       email: "test@example.com",
       code: mockOtp,
     });
 
-    console.log("aoaoa")
     expect(response.statusCode).toBe(400);
     expect(response.body).toHaveProperty("status", "fail");
     expect(response.body).toHaveProperty("message", "Invalid or Expired OTP");
-    //await redis.del("customer-service:OTP:test@example.com");
   });
 
   it("should fail and reject a mismatch otp", async () => {
     const mockOtp = generateOTP();
-    //const expiredTime = new Date(Date.now() - 1000);
     const hashedOtp = bcrypt.hashSync(mockOtp.toString(), 10);
 
     const redisKey: string = `customer-service:OTP:test@example.com`;
@@ -125,8 +117,6 @@ describe("user endpoints", () => {
     const response = await request(app).post("/api/v1/users/resend").send({
       email: "test@example.com",
     });
-    //console.log(response)
-
     expect(response.statusCode).toBe(200);
     expect(response.body).toHaveProperty("status", "success");
     expect(response.body.data).toHaveProperty(
@@ -162,7 +152,6 @@ describe("user endpoints", () => {
 
   it("should reject if no existing Otp", async () => {
     const mockOtp = generateOTP();
-    //const expiredTime = Number(Math.ceil(Date.now() - 1000) / 1000);
     const hashedOtp = bcrypt.hashSync(mockOtp.toString(), 10);
 
     const redisKey: string = `customer-service:OTP:test@example.com`;
@@ -182,7 +171,6 @@ describe("user endpoints", () => {
     const Otpcode: string = String(await redis.get(redisKey));
     const rate = String(await redis.get("otp:rate:test@example.com"));
     const cool = String(await redis.get("otp:cooldown:test@example.com"));
-    console.log(Otpcode);
     expect(Otpcode).toBe("null");
     expect(rate).toBe("null");
     expect(cool).toBe("null");
@@ -202,11 +190,11 @@ describe("user endpoints", () => {
   });
 
   it("should not rate limit", async () => {
-    //await redis.set("otp:rate:test@example.com", 3, "EX", -1);
-    await redis.multi()
-  .set("otp:rate:test@example.com", 3)
-  .expire("otp:rate:test@example.com", -1)
-  .exec()
+    await redis
+      .multi()
+      .set("otp:rate:test@example.com", 3)
+      .expire("otp:rate:test@example.com", -1)
+      .exec();
     await redis.set("customer-service:OTP:test@example.com", 456333, "EX", 300);
     const response = await request(app).post("/api/v1/users/resend").send({
       email: "test@example.com",
@@ -228,7 +216,7 @@ describe("user endpoints", () => {
     await redis.set("otp:cooldown:test@example.com", "1", "EX", 30);
 
     const response = await request(app).post("/api/v1/users/resend").send({
-      email: "test@example.com"
+      email: "test@example.com",
     });
 
     expect(response.statusCode).toBe(429);
@@ -345,7 +333,6 @@ describe("user endpoints", () => {
 
   it("should fail and reject an expired OTP", async () => {
     const mockOtp = generateOTP();
-    // const expiredTime = new Date(Date.now() - 1000);
     const hashedOtp = bcrypt.hashSync(mockOtp.toString(), 10);
 
     const redisKey: string = `customer-service:OTP:test@example.com`;
@@ -360,12 +347,10 @@ describe("user endpoints", () => {
     expect(response.statusCode).toBe(400);
     expect(response.body).toHaveProperty("status", "fail");
     expect(response.body).toHaveProperty("message", "Invalid or Expired OTP");
-    //await redis.del("customer-service:OTP:test@example.com");
   });
 
   it("should reject when there is an OTP mismatch", async () => {
     const mockOtp = generateOTP();
-    //const expiredTime = new Date(Date.now() - 1000);
     const hashedOtp = bcrypt.hashSync(mockOtp.toString(), 10);
 
     const redisKey: string = `customer-service:OTP:test@example.com`;

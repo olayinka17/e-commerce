@@ -1,6 +1,5 @@
 import type { ServiceError } from "@grpc/grpc-js";
-import { client } from "../server.js";
-
+import { client } from "../utils/bootstrap.js";
 interface ProductI {
   id: string;
   name: string;
@@ -9,11 +8,11 @@ interface ProductI {
   price: number;
   sku: string;
 }
-export function getProducts(ids: string[]): Promise<{items: ProductI[]}> {
+export function getProducts(ids: string[]): Promise<{ items: ProductI[] }> {
   return new Promise((resolve, reject) => {
     client.getProducts(
-      { ids: ids.map(id => ({id})) },
-      (err: ServiceError | null, response: {items: ProductI[]}) => {
+      { ids: ids.map((id) => ({ id })) },
+      (err: ServiceError | null, response: { items: ProductI[] }) => {
         if (err) {
           return reject(err);
         }

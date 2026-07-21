@@ -24,9 +24,8 @@ export const subscribeEvent = async (
 
     await consumer.run({
       autoCommit: false,
-      
+
       eachMessage: async ({ topic, partition, message }) => {
-        console.log(topic);
         const key: string | undefined = message.key?.toString();
         const payload = JSON.parse(message.value!.toString());
         const event_id =
@@ -37,7 +36,6 @@ export const subscribeEvent = async (
         const outboxType: string | undefined =
           message.headers?.type?.toString();
         let lastError: string | undefined = message.headers?.error?.toString();
-        //console.log(payload, event_id, attempt, max_retry, key, outboxType);
 
         const is_processed = await prisma.processed_events.findFirst({
           where: {
@@ -57,7 +55,6 @@ export const subscribeEvent = async (
         }
         switch (topic) {
           case Topics.INVENTORY_RESERVE:
-            console.log(payload.order.products);
             try {
               await inventory.manageOrder(
                 payload.order.id,
@@ -79,11 +76,9 @@ export const subscribeEvent = async (
                   processed_at: new Date(),
                 },
               });
-              console.log("ksksk")
             } catch (err: any) {
               if (err instanceof PrismaClientKnownRequestError) {
                 if (err.code === "P2010") {
-
                   const cause = (err.meta as any)?.driverAdapterError?.cause;
 
                   if (cause?.code === "23514") {
@@ -121,7 +116,6 @@ export const subscribeEvent = async (
                     ]);
                   }
 
-
                   await prisma.processed_events.create({
                     data: {
                       event_id,
@@ -140,7 +134,6 @@ export const subscribeEvent = async (
                 return;
               }
               if (err instanceof InventoryError) {
-                console.log("sksksk")
                 await kafkaService.publish(Topics.INVENTORY_FAILED, [
                   {
                     value: {
@@ -327,7 +320,7 @@ export const subscribeEvent = async (
                 return;
               }
               const backoff = 1000 * Math.pow(2, attempt - 1);
-              console.log(err.message.toString())
+              console.log(err.message.toString());
               await kafkaService.publish(Topics.INVENTORY_FAILED_RETRY, [
                 {
                   value: payload,
@@ -345,7 +338,6 @@ export const subscribeEvent = async (
             break;
           case "outbox.event.products":
             const product_id: string = payload.product_id;
-            console.log("outbox event products", outboxType, product_id);
             try {
               if (outboxType === "PRODUCT_ARCHIVE") {
                 await inventory.manage_delete_product(product_id, event_id);

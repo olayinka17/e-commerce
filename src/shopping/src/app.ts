@@ -16,6 +16,9 @@ app.use("/api/v1/shopping", Router);
 app.get("api/v1/", (req: Request, res: Response, next: NextFunction) => {
   next(new CustomError(`can't find ${req.originalUrl}, on this server`, 404));
 });
-
+app.use((req: Request, res: Response, next: NextFunction) => {
+  next(new CustomError(`can't find ${req.originalUrl} on this server`, 404));
+});
 app.use(globalErrorHandler);
+
 export default app;

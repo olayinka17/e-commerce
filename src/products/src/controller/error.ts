@@ -1,8 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
-import CustomError from "../utils/CustomError.js"
+import CustomError from "../utils/CustomError.js";
 import type { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
-import "dotenv/config.js"
-
+import "dotenv/config.js";
 
 const handleDupicateFiedDb = (
   err: PrismaClientKnownRequestError,
@@ -26,7 +25,6 @@ const handleValidationErrorDb = (
   const message = `Validation Error: Invalid format proviided for ${field}`;
   return new CustomError(message, 400);
 };
-
 
 const sendErrorDev = (err: CustomError, req: Request, res: Response) => {
   res.status(err.statusCode).json({

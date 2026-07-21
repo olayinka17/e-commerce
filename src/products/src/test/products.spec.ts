@@ -3,31 +3,19 @@ import { execFileSync } from "node:child_process";
 import { readFileSync as fsReadFileSync } from "node:fs";
 import path from "path";
 import request from "supertest";
-// import app from "../app.js";
 import { Network, GenericContainer, Wait } from "testcontainers";
 import { KafkaContainer } from "@testcontainers/kafka";
 import { PostgreSqlContainer } from "@testcontainers/postgresql";
-import { Kafka, logLevel, type Consumer, type Producer } from "kafkajs";
+import { Kafka } from "kafkajs";
 import * as grpc from "@grpc/grpc-js";
 import * as protoloader from "@grpc/proto-loader";
 import axios from "axios";
-//import { startGrpcServer } from "../grpc/grpc-server.js";
 import type { PrismaClient } from "../generated/prisma/client.js";
 import type { ServiceError } from "@grpc/grpc-js";
-import type { sendUnaryData, ServerUnaryCall } from "@grpc/grpc-js";
-import type { CurrentProducts, Products } from "../generated/prisma/client.js";
-import type {
-  ProductRequest,
-  ProductsRequest,
-  achiveResponseI,
-} from "../utils/RpcFunctions.js";
-import type {
-  CategoriesI,
-  CategoryResI,
-  ProductI,
-  ProductsI,
-  ProductUI,
-} from "../service/products.js";
+
+import type { CurrentProducts } from "../generated/prisma/client.js";
+import type { achiveResponseI } from "../utils/RpcFunctions.js";
+import type { CategoryResI, ProductsI } from "../service/products.js";
 
 async function waitForExpect(
   assertionFn: (...args: any[]) => any,
@@ -66,6 +54,8 @@ describe("product test", () => {
   let AdminClient: any;
   let category_id: string;
   let product_id: string;
+  let app: any;
+  let serverConfig: any;
   beforeAll(
     async () => {
       // Initializing shared Docker network
@@ -106,37 +96,6 @@ describe("product test", () => {
       });
       console.log("Prisma schema synchronized successfully");
 
-      //   execSync(
-      //     `docker exec ${dbName} \
-      //     psql -U postgres -d products \
-      //     -c 'CREATE PUBLICATION product_publication FOR TABLE "InventoryOutbox";'
-      // `,
-      //     { stdio: "inherit" },
-      //   );
-
-      // const result = spawnSync(
-      //   "docker",
-      //   [
-      //     "exec",
-      //     dbName,
-      //     "psql",
-      //     "-U",
-      //     "postgres",
-      //     "-d",
-      //     "products",
-      //     "-c",
-      //     'CREATE PUBLICATION product_publication FOR TABLE "InventoryOutbox";',
-      //   ],
-      //   {
-      //     stdio: "inherit",
-      //   },
-      // );
-
-      // if (result.status !== 0) {
-      //   throw new Error("Failed to create publication");
-      // }
-
-      // const sql = fsReadFileSync("publication.sql", "utf8");
       const sql = fsReadFileSync(
         path.join(process.cwd(), "src", "test", "publication.sql"),
         "utf8",
@@ -151,20 +110,8 @@ describe("product test", () => {
         },
       );
 
-      // execSync(`docker exec ${dbName} psql -U postgres -d products -c `)
-      // execSync(
-      //   `docker exec -i ${dbName} psql -U postgres -d products < publication.sql`,
-      //   { stdio: "inherit", shell: true as any},
-      // );
-      // execSync(
-      //   `docker exec ${dbName} psql -U postgres -d products -c "CREATE PUBLICATION product_publication FOR TABLE \\"InventoryOutbox\\";"`,
-      //   { stdio: "inherit" },
-      // );
-
-      //const pluginpath = path.resolve(__dirname, "./connector");
-
       debeziumContainer = await new GenericContainer(
-        "quay.io/debezium/connect:3.6",
+        "quay.io/debezium/connect@sha256:bd0ef1f8aa0690bc9bc0dec78c209f24f5d53ffd40fe5bc36c22db87052a51ad",
       )
         .withNetwork(network)
         .withExposedPorts(8083)
@@ -227,65 +174,25 @@ describe("product test", () => {
               "eventtype:header:type",
           },
         });
-        // console.log(response.status);
-        // console.log(response.data);
-
-        // await new Promise((resolve) => setTimeout(resolve, 10000));
-        // const { data } = await axios.get(
-        //   `${connectUrl}/connectors/product-outbox-connector/status`,
-        // );
-        // console.dir(data, { depth: null });
-
-        // console.dir(data, { depth: null });
-        // const plugins = await axios.get(`${connectUrl}/connector-plugins`);
-
-        // console.dir(plugins.data, { depth: null });
       } catch (err: any) {
-        console.log(err.response?.status);
-        console.log(err.response?.data);
         throw err;
       }
-
-      // const { data } = await axios.get(
-      //   `${connectUrl}/connectors/product-outbox-connector/config`,
-      // );
-
-      // console.dir(data);
-
-      // const chksql = fsReadFileSync(
-      //   path.join(process.cwd(), "src", "test", "check.sql"),
-      // );
-      // execFileSync(
-      //   "docker",
-      //   ["exec", "-i", dbName, "psql", "-U", "postgres", "-d", "products"],
-      //   {
-      //     input: chksql,
-      //     stdio: ["pipe", "inherit", "inherit"],
-      //   },
-      // );
       const broker = `${kafkaHost}:${kafkaPort}`;
 
       kafkaClient = new Kafka({
         clientId: "shopping-test-service",
         brokers: [broker],
-        // logLevel: logLevel.ERROR,
       });
-
-      const admin = kafkaClient.admin();
-      await admin.connect();
-
-      console.log(await admin.listTopics());
-
-      await admin.disconnect();
 
       const prismaModule = await import("../utils/prisma.js");
       prisma = prismaModule.prisma;
 
-      const serverModule = await import("../grpc/grpc-server.js");
-      const server = serverModule.startGrpcServer;
+      const appModule = await import("../app.js");
+      app = appModule.default;
 
-      await server();
-      //await startGrpcServer();
+      serverConfig = await import("../grpc/grpc-server.js");
+
+      await serverConfig.startGrpcServer();
 
       ProductClient = new productsPackage.Products(
         "localhost:40098",
@@ -309,6 +216,7 @@ describe("product test", () => {
       if (postgresqlContainer) await postgresqlContainer.stop();
       if (debeziumContainer) await debeziumContainer.stop();
       await network.stop();
+      await serverConfig.stopServer();
     },
     50 * 60 * 1000,
   );
@@ -364,8 +272,6 @@ describe("product test", () => {
     expect(grpcResponse.category_id).toBe(category_id);
 
     product_id = grpcResponse.id as string;
-    const outbox = await prisma.inventoryOutbox.findMany();
-    console.log(outbox);
     const receivedKafkaMessages: Record<string, string>[] = [];
     const receivedKafkaKey: string[] = [];
     const receivedKafkaHeaders: string[] = [];
@@ -379,6 +285,7 @@ describe("product test", () => {
     });
     await waitForExpect(
       async () => {
+        expect(receivedKafkaMessages.length).toBe(1);
         expect(receivedKafkaMessages[0]).toEqual({
           product_id: grpcResponse.id,
         });
@@ -502,7 +409,6 @@ describe("product test", () => {
     });
     await waitForExpect(
       async () => {
-        //console.log(receivedKafkaMessages)
         expect(receivedKafkaMessages[0]).toEqual({
           product_id,
         });
@@ -532,7 +438,6 @@ describe("product test", () => {
       },
     );
 
-    console.log(grpcResponse);
     expect(grpcResponse?.category_id).toBe(category_id);
     expect(grpcResponse?.description).toBe("The best ever");
     expect(grpcResponse?.price).toBe(300);
@@ -561,5 +466,32 @@ describe("product test", () => {
     expect(Responsemaps[0]?.description).toBe("The best ever");
     expect(Responsemaps[0]?.price).toBe(300);
     expect(Responsemaps[0]?.name).toBe("socket");
+  });
+
+  it("should get products by category", async () => {
+    const response = await request(app).get(
+      `/api/v1/products/category/Electronics`,
+    );
+
+    expect(response).toBeTruthy();
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty("status", "success");
+    expect(response.body).toHaveProperty("data");
+    expect(response.body.data).toHaveProperty("products");
+  });
+
+  it("should get product by ID", async () => {
+    const response = await request(app).get(`/api/v1/products/${product_id}`);
+
+    expect(response).toBeTruthy();
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty("status", "success");
+    expect(response.body).toHaveProperty("data");
+    expect(response.body.data).toHaveProperty("product");
+    expect(response.body.data.product).toHaveProperty(
+      "category_id",
+      category_id,
+    );
+    expect(response.body.data.product).toHaveProperty("id", product_id);
   });
 });

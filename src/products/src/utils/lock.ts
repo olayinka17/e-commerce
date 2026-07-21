@@ -1,16 +1,4 @@
 import { redis } from "./redis.js";
-
-// redis.defineCommand("releaseLock", {
-//   numberOfKeys: 1,
-//   lua: `
-//         if redis.call("get", KEYS[1]) == ARGV[1] then
-//             return redis.call("del", KEYS[1])
-//         else
-//             return 0
-//         end
-//     `,
-// });
-
 const LUA_SCRIPT = `
     local key = KEYS[1]
     local value = ARGV[1]
@@ -27,12 +15,10 @@ export async function acquireLock(
   token: string,
   lock_timeout: number,
 ) {
-  //const end = Date.now() + acquire_timeout * 1000;
-
-    const result = await redis.set(lockKey, token, "EX", lock_timeout, "NX");
-    if (result) {
-      return token;
-    }
+  const result = await redis.set(lockKey, token, "EX", lock_timeout, "NX");
+  if (result) {
+    return token;
+  }
 
   return false;
 }
@@ -44,5 +30,5 @@ export async function release_lock(lockKey: string, token: string) {
     lockKey.toString(),
     token.toString(),
   );
-  return result === 1
+  return result === 1;
 }

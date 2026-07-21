@@ -13,7 +13,6 @@ import {
 import type {
   RevenueI,
   OrderI,
-  TransactionsI,
   ProductsI,
   ProductUI,
   TransactionI,
@@ -50,7 +49,6 @@ export class AdminService {
     const orders: { orders: OrderI[]; nextCursor: string | null } | null =
       await totalOrders(Number(limit), String(beforeTimestamp), String(status));
 
-    //console.log(orders)
     return orders;
   };
 

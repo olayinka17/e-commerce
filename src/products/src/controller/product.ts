@@ -8,18 +8,6 @@ export class ProductController {
 
   constructor() {}
 
-  //    createProduct = async(req: Request, res: Response) => {
-  //     const { name, category_id, description, price, sku} = req.body
-
-  //     const product = await this.productService.CreateProduct({ name, category_id, description, price, sku})
-  //     res.status(201).json({
-  //         status: "success",
-  //         data: {
-  //             product
-  //         }
-  //     })
-  //    }
-
   getProducts = async (req: Request, res: Response) => {
     const query = req.query as unknown as Record<string, string | undefined>;
     const redisKey: string = `products:${req.originalUrl}`;
@@ -28,29 +16,28 @@ export class ProductController {
     const lock = await acquireLock(lockkey, token, 20);
 
     if (lock) {
-        try {
-            const data = await this.productService.GetProducts(query);
-            await redis.set(redisKey, JSON.stringify(data));
+      try {
+        const data = await this.productService.GetProducts(query);
+        await redis.set(redisKey, JSON.stringify(data));
 
-            return res.status(200).json({
-                status: "success",
-                data,
-            })
-        } finally {
-            await release_lock(lockkey, token);
-            
-        }
+        return res.status(200).json({
+          status: "success",
+          data,
+        });
+      } finally {
+        await release_lock(lockkey, token);
+      }
     }
 
     for (let i = 0; i < 20; i++) {
-        await new Promise((resolve) => setTimeout(resolve, 250));
-        const cachedResponse = await redis.get(redisKey);
-        if (cachedResponse) {
-            return res.send(200).json({
-                status: "success",
-                data: JSON.parse(cachedResponse),
-            });
-        }
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      const cachedResponse = await redis.get(redisKey);
+      if (cachedResponse) {
+        return res.send(200).json({
+          status: "success",
+          data: JSON.parse(cachedResponse),
+        });
+      }
     }
     const data = await this.productService.GetProducts(query);
     res.status(200).json({
@@ -74,9 +61,12 @@ export class ProductController {
 
   getProductsByCategory = async (req: Request, res: Response) => {
     const category = req.params.type as string;
-    const query = req.query as unknown as Record<string, string | undefined>
+    const query = req.query as unknown as Record<string, string | undefined>;
 
-    const products = await this.productService.GetProductByCategory(category, query);
+    const products = await this.productService.GetProductByCategory(
+      category,
+      query,
+    );
 
     res.status(200).json({
       status: "success",
@@ -100,13 +90,13 @@ export class ProductController {
   };
 
   getCategories = async (req: Request, res: Response) => {
-    const categories = await this.productService.getCategory()
-
+    const categories = await this.productService.getCategory();
+    console.log(categories);
     res.status(200).json({
       status: "success",
       data: {
-        categories
-      }
-    })
-  }
+        categories,
+      },
+    });
+  };
 }

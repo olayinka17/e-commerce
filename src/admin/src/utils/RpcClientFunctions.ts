@@ -2,6 +2,7 @@ import type { ServiceError } from "@grpc/grpc-js";
 import type { Decimal } from "../generated/prisma/internal/prismaNamespace.js";
 import { client, InventoryClient, ProductClient } from "../utils/bootstrap.js";
 import type { ProductI } from "../service/admin.js";
+
 import CustomError from "./CustomError.js";
 
 export interface PaginateI {
@@ -69,7 +70,6 @@ export function totalOrders(
   beforeTimestamp?: string,
   status?: string,
 ): Promise<{ orders: OrderI[], nextCursor: string | null } | null> {
-  console.log(limit, beforeTimestamp, status)
   return new Promise((resolve, reject) => {
     client.totalOrders(
       {
@@ -82,11 +82,8 @@ export function totalOrders(
         response: { orders: OrderI[], nextCursor: string | null } | null,
       ) => {
         if (err) {
-          console.log(err)
           return reject(err);
         }
-
-        console.log("response from grpc", response);
         resolve(response);
       },
     );
@@ -147,7 +144,6 @@ export function createProducts({
   price,
   sku,
 }: ProductI): Promise<ProductsI> {
-  console.log(price);
   return new Promise((resolve, reject) => {
     ProductClient.createProducts(
       {
@@ -159,11 +155,8 @@ export function createProducts({
       },
       (err: ServiceError | null, response: ProductsI) => {
         if (err) {
-          console.log("error from grpc", err);
           return reject(new CustomError(err.details, 400));
         }
-
-        console.log("response from grpc", response.price);
         resolve(response);
       },
     );
@@ -219,8 +212,6 @@ export function addMoreStock(
         if (err) {
           return reject(err);
         }
-        console.log(response);
-
         resolve(response);
       },
     );
@@ -265,7 +256,6 @@ export function createCategory(name: string, description: string) {
         if (err) {
           return reject(new CustomError(err.details, 400));
         }
-       // console.log("response from grpc", response);
         resolve(response);
       },
     );

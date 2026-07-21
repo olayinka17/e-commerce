@@ -90,7 +90,6 @@ export class AdminController {
       price,
       sku,
     });
-    //invalidate product cache
     await invalidateCacheByPattern(`products:*`);
     res.status(201).json({
       status: "success",

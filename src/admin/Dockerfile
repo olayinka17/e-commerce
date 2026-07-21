@@ -27,7 +27,7 @@ RUN npm run build --workspace=admin
 
 FROM node:22-alpine AS runtime
 WORKDIR /app
-COPY --from=builder /app/src/admin/dist ./dist/
-COPY --from=builder /app/node_modules ./node_modules/
+COPY --from=builder /app/src/admin/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
 EXPOSE 4092
 CMD ["node", "dist/server.js"]

@@ -133,7 +133,6 @@ function bindServer(server: grpc.Server, address: string): Promise<number> {
           return;
         }
 
-        server.start(); // Start serving requests
         resolve(port);
       },
     );

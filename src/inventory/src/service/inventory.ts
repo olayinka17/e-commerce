@@ -19,12 +19,7 @@ interface params {
 interface response {
   success: boolean;
 }
-interface InventoryI {
-  product_id: string;
-  available_quantity: number;
-  reserved_quantity: number;
-  physical_stock: number;
-}
+
 interface Cart_itemsI {
   id: string;
   cart_id: string;
@@ -40,7 +35,6 @@ export class InventoryService {
     this.prisma = prisma;
   }
 
-  // change it to transaction so you can add inventory_movement for the product
   async createInventory(product_id: string, event_id: string) {
     return await this.prisma.$transaction(async (tx) => {
       await tx.inventory.create({
@@ -67,9 +61,6 @@ export class InventoryService {
       String(a.product_id).localeCompare(String(b.product_id)),
     );
     const productIds = sortedItems.map((item) => item.product_id);
-    console.log(productIds);
-    // console.log(typeof productIds[0]);
-    // console.log(items);
     return await this.prisma.$transaction(async (tx) => {
       const existingReservation: Inventory_reservation[] | [] =
         await tx.$queryRaw<Inventory_reservation[] | []>`
@@ -77,7 +68,6 @@ export class InventoryService {
       WHERE order_id = ${order_id}
       FOR UPDATE
       `;
-
 
       if (existingReservation.length > 0) {
         if (existingReservation[0]?.status === "confirmed") return;
@@ -91,7 +81,7 @@ export class InventoryService {
           WHERE product_id IN (${Prisma.join(productIds)})
           FOR UPDATE
           `;
-          
+
           const values = Prisma.join(
             sortedItems.map(
               (item) =>
@@ -116,8 +106,6 @@ export class InventoryService {
               "Product state changed since you last added to cart",
             );
           }
-         
-          console.log("let");
           await tx.inventory_reservation.updateMany({
             where: {
               order_id,
@@ -135,7 +123,6 @@ export class InventoryService {
         FOR UPDATE
         `;
 
-
         const values = Prisma.join(
           sortedItems.map(
             (item) => Prisma.sql`(${item.product_id}, ${item.quantity})`,
@@ -144,7 +131,7 @@ export class InventoryService {
         const updated = await tx.$queryRaw<{ product_id: string }[]>`
           UPDATE "Inventory" AS i
           SET 
-            reserved_quantit = i.reserved_quantity + v.quantity::int,
+            reserved_quantity = i.reserved_quantity + v.quantity::int,
             available_quantity = i.available_quantity - v.quantity::int
           FROM (
             VALUES
@@ -154,8 +141,6 @@ export class InventoryService {
           RETURNING i.product_id
           ;
           `;
-        
-        
 
         if (updated.length !== items.length) {
           throw new InventoryError(
@@ -388,7 +373,6 @@ export class InventoryService {
     return movement;
   }
 
-
   async manage_inventory(
     product_id: string,
     qty: number,
@@ -400,7 +384,7 @@ export class InventoryService {
     if (is_remove) {
       await this.prisma.$transaction(async (tx) => {
         // check if there is enough stock to deduct
-        
+
         await tx.inventory.update({
           where: { product_id },
           data: {
@@ -460,7 +444,6 @@ export class InventoryService {
       SELECT * FROM "Inventory"
       WHERE product_id = ${product_id}
       FOR UPDATE`;
-      console.log(inventory)
 
       if (!inventory[0]?.is_active) {
         await tx.processed_events.create({
@@ -473,13 +456,12 @@ export class InventoryService {
       }
 
       if (inventory[0]?.available_quantity === 0) {
-        const ine = await tx.inventory.update({
+        await tx.inventory.update({
           where: { product_id },
           data: {
             is_active: false,
           },
         });
-        console.log(ine)
 
         await tx.processed_events.create({
           data: {
@@ -490,7 +472,7 @@ export class InventoryService {
         return;
       }
 
-      const new_ine = await tx.inventory.update({
+      await tx.inventory.update({
         where: { product_id },
         data: {
           is_active: false,
@@ -501,7 +483,6 @@ export class InventoryService {
         },
       });
 
-      console.log(new_ine)
       await tx.processed_events.create({
         data: {
           event_id,

@@ -1,12 +1,14 @@
+import { config } from "dotenv";
 import { Kafka, logLevel } from "kafkajs";
 export class KafkaService {
     kafka;
     producer;
     consumer;
-    constructor(config) {
+    constructor(kafkaconfig) {
+        console.log(kafkaconfig.brokers);
         this.kafka = new Kafka({
-            clientId: config.clientId,
-            brokers: config.brokers,
+            clientId: kafkaconfig.clientId,
+            brokers: kafkaconfig.brokers,
             logLevel: logLevel.NOTHING
         });
         this.producer = this.kafka.producer();
@@ -25,7 +27,7 @@ export class KafkaService {
             value: JSON.stringify(msg.value),
             headers: msg.headers
         }));
-        console.log(formattedMessages);
+        //console.log(formattedMessages)
         await this.producer.send({
             topic,
             messages: formattedMessages

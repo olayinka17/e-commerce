@@ -62,6 +62,6 @@ export async function stopServer() {
 
   if (kafkaService) {
     await kafkaService.disconnect();
-    await kafkaService.disconnectConsumer()
+    await kafkaService.disconnectConsumer();
   }
 }

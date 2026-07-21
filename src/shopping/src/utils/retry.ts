@@ -82,8 +82,6 @@ class Retry {
         if (this.max_delay) {
           this._delay = Math.min(this._delay, this.max_delay);
         }
-
-        
       }
     }
   }
@@ -121,7 +119,7 @@ export const retry_function = async (
     backoff,
     jitter,
     retryStatusCodes,
-    retryErrors
+    retryErrors,
   );
 
   const result = async (...args: any[]) => {

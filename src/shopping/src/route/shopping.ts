@@ -1,10 +1,9 @@
 import express from "express";
-import { ShoppingController } from "../controller/shopping.js";
+import { shoppingController } from "../shopping-controller.js";
 import { CatchAsync } from "../utils/CatchAsync.js";
 import { protect } from "../middleware/auth.js";
 import { orderCached } from "../middleware/cacheMiddleware.js";
 
-export const shoppingController = new ShoppingController();
 
 const Router = express.Router();
 
@@ -62,6 +61,11 @@ Router.get(
   CatchAsync<{}, any, {}, Record<string, string | undefined>>(
     shoppingController.getOrders,
   ),
+);
+
+Router.get(
+  "/status/:id",
+  CatchAsync<{ id: string }, any, {}, {}>(shoppingController.getOrderStatus),
 );
 
 export default Router;

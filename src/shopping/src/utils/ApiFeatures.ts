@@ -23,7 +23,7 @@ export class APIFeatures<T, whereInput extends object> {
     const excludedFields = ["page", "sort", "limit", "fields", "search"];
     excludedFields.forEach((el) => delete queryObj[el]);
 
-    const where: Record<string, any> = {user_id};
+    const where: Record<string, any> = { user_id };
 
     for (const key in queryObj) {
       if (!queryObj[key]) continue;

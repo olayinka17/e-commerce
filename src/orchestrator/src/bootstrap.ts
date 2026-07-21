@@ -9,15 +9,13 @@ const kafkaService = new KafkaService("orchestrator-service");
 
 await kafkaService.connect();
 
-
 await subscribeEvent(kafkaService).catch((error) => {
-  kafkaService.disconnect()
+  kafkaService.disconnect();
   console.error("Error subscribing to events:", error);
-  
 });
 process.on("unhandledRejection", (err: any) => {
   console.log(err.name, err.message);
   console.log("UNHANDLED REJECTION. Shutting down...");
   kafkaService.disconnect();
-  process.exit(1)
+  process.exit(1);
 });

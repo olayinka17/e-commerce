@@ -1,19 +1,14 @@
 import app from "./app.js";
-import "./utils/background-job.js"
+import "./utils/background-job.js";
 import "dotenv/config";
-import { kafkaService } from "./utils/kafka.js"
-import { startGrpcclient } from "./grpc/grpc-client.js";
+import { kafkaService } from "./utils/kafka.js";
 import { startGrpcServer } from "./grpc/grpc-server.js";
-
+import { bootstrap } from "./utils/bootstrap.js";
 
 await kafkaService.connect();
 
-export const client = await startGrpcclient();
+await bootstrap();
 await startGrpcServer();
-
-
-
-
 
 const PORT = process.env.PORT;
 

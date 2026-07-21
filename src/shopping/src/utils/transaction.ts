@@ -12,14 +12,6 @@ import { redis } from "./redis.js";
 import { Redis } from "ioredis";
 import { Topics } from "@enterprise/kafka-common";
 
-//   user_id String
-//   products Order_items[]
-//   status Status @default(pending)
-//   transaction_id String?
-//   payment_status Payment_status @default(pending)
-//   total_price Decimal
-//   created_at DateTime @default(now())
-
 interface TransactionI {
   id: string;
   status: transaction_status;
@@ -100,9 +92,7 @@ const retry_verify = await retry_function(
   [503, 429, 500],
   ["ECONNABORTED", "ECONNRESET", "ENOTFOUND", "ETIMEOUT"],
 );
-// export const payment_retry = async (order: OrderI, email: string) {
 
-// }
 export const payment = async (
   order: OrderI,
   email: string,
@@ -119,8 +109,6 @@ export const payment = async (
     port: 6379,
   });
   const channelName = `order_payment_url:${correlation_id}`;
-  console.log(order.transaction);
-  console.log("jjsj");
 
   if (order.transaction?.length === 0) {
     transaction = await prisma.$transaction(async (tx) => {
@@ -140,10 +128,8 @@ export const payment = async (
 
       return transaction;
     });
-    console.log("transaction");
     await invalidateCacheByPattern(`transactions:admin:*`);
   } else {
-    console.log("transaction already exists");
     const key = `lock:${order.id}`;
     const token = uuidv4();
     await acquireLock(key, token, 5, 6);
@@ -155,7 +141,6 @@ export const payment = async (
       orderBy: { created_at: "desc" },
       take: 1,
     });
-    console.log("last_transaction", typeof last_transaction[0]?.status);
 
     if (last_transaction[0]?.status === "successful") {
       await publisher.publish(
@@ -193,31 +178,18 @@ export const payment = async (
         });
         return transaction;
       });
-
-      // transaction = await prisma.transactions.create({
-      //   data: {
-      //     amount: order.total_price,
-      //     order_id: order.id,
-      //   },
-      // });
       await invalidateCacheByPattern(`transactions:admin:*`);
       await release_lock(key, token);
     } else if (last_transaction[0]?.status === "pending") {
-      console.log("djdjdjdddd");
       // verify the transaction status with the payment gateway first before making the same  transaction to them
       // if the transaction get to the gateway then set the status to idempotency cache and update the order and transaction status the return
       try {
-        console.log("ksksksk");
         const verify = await retry_verify(last_transaction[0]?.id, headers);
-
-        console.log("sososo");
-        //console.log(verify)
 
         if (
           verify.data.data.status === "ongoing" ||
           verify.data.data.status === "pending"
         ) {
-          console.log("kkkdkdkdk");
           await publisher.publish(
             channelName,
             JSON.stringify({
@@ -233,7 +205,6 @@ export const payment = async (
           });
           return;
         } else if (verify.data.data.status === "success") {
-          console.log("jdjdjdjdjdjdj");
           //wait for webhook to complete
           await publisher.publish(
             channelName,
@@ -250,7 +221,6 @@ export const payment = async (
           });
           return;
         } else if (verify.data.data.status === "abandoned") {
-          console.log("abandoned");
           transaction = await prisma.$transaction(async (tx) => {
             await tx.$queryRaw`
              SELECT * FROM "Transactions"
@@ -392,25 +362,16 @@ export const payment = async (
         }
       }
     }
-    //transaction = order.transaction;
   }
-
-  console.log(transaction?.amount);
 
   const data = {
     amount: (transaction?.amount as unknown as number) * 100,
     email,
     reference: transaction?.id,
   };
-
-  console.log("djd:");
   const response = await retry(data, headers);
-  console.log("kja");
-  //console.log(response);
 
   const paymentUrl = response.data.data.authorization_url;
-
-  console.log("paymentUrl", paymentUrl);
 
   await prisma.orders.update({
     where: {
@@ -422,11 +383,6 @@ export const payment = async (
   });
 
   await publisher.publish(channelName, JSON.stringify({ paymentUrl }));
-
-  console.log(`Published payment URL to channel: ${channelName}`);
-  // return {
-  //   paymentUrl,
-  // };
 };
 
 export const paystackWebhook = async (body: ResponseI, signature: string) => {

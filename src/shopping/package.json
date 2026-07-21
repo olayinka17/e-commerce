@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "rimraf dist/test && cross-env NODE_ENV=test && set NODE_OPTIONS=--experimental-vm-modules && jest --runInBand --detectOpenHandles",
     "build": "rimraf dist && npx tsc"
   },
   "keywords": [],
@@ -12,6 +12,8 @@
   "type": "module",
   "description": "",
   "devDependencies": {
+    "@testcontainers/kafka": "^12.0.4",
+    "@testcontainers/postgresql": "^12.0.4",
     "@types/bcryptjs": "^2.4.6",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
@@ -23,7 +25,9 @@
     "cross-env": "^10.1.0",
     "jest": "^30.4.2",
     "jest-mock-extended": "^4.0.1",
+    "madge": "^8.0.0",
     "supertest": "^7.2.2",
+    "testcontainers": "^12.0.4",
     "ts-jest": "^29.4.11",
     "typescript": "^6.0.3"
   },

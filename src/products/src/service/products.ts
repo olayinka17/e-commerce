@@ -1,7 +1,5 @@
 import {
-  type ProductsFindManyArgs,
   type Decimal,
-  type ProductsWhereInput,
   type CurrentProductsFindManyArgs,
   type CurrentProductsWhereInput,
 } from "../generated/prisma/internal/prismaNamespace.js";
@@ -13,7 +11,7 @@ import type {
   ProductRequest,
   ProductsRequest,
 } from "../utils/RpcFunctions.js";
-import type { CurrentProducts, Products } from "../generated/prisma/client.js";
+import type { CurrentProducts } from "../generated/prisma/client.js";
 
 export interface ProductI {
   id?: string;
@@ -66,8 +64,6 @@ export class ProductService {
       ...features,
       orderBy: features.orderBy!,
     });
-
-    // let categories = {}
 
     const grouped = productsResult.reduce(
       (acc, product) => {
@@ -156,13 +152,16 @@ export class ProductService {
   }
 
   async GetSelectedProducts(
-    call: ServerUnaryCall<ProductsRequest, {items: Partial<CurrentProducts>[]}>,
-  ): Promise<{items: Partial<CurrentProducts>[]}> {
-    const ids = call.request.ids.map((item: any) => item.id)
+    call: ServerUnaryCall<
+      ProductsRequest,
+      { items: Partial<CurrentProducts>[] }
+    >,
+  ): Promise<{ items: Partial<CurrentProducts>[] }> {
+    const ids = call.request.ids.map((item: any) => item.id);
 
-    console.log(ids)
+    console.log(ids);
     const products = await this.prisma.currentProducts.findMany({
-      where: { id: { in:  ids} },
+      where: { id: { in: ids } },
       select: {
         id: true,
         name: true,
@@ -174,7 +173,7 @@ export class ProductService {
         updated_at: false,
       },
     });
-    return {items: products};
+    return { items: products };
   }
 
   async CreateProduct(
@@ -233,7 +232,6 @@ export class ProductService {
   async update_product(
     call: ServerUnaryCall<ProductUI, ProductsI>,
   ): Promise<ProductsI> {
-    console.log("update_product called with request:", call.request);
     const product = await this.prisma.products.update({
       where: { id: call.request.product_id },
       data: {
@@ -255,7 +253,12 @@ export class ProductService {
       },
     });
 
-    return {...product, price: Number(product.price), created_at: String(new Date(product.created_at)), updated_at: String(new Date(product.updated_at))};
+    return {
+      ...product,
+      price: Number(product.price),
+      created_at: String(new Date(product.created_at)),
+      updated_at: String(new Date(product.updated_at)),
+    };
   }
 
   async archive_product(
@@ -271,7 +274,7 @@ export class ProductService {
         },
       });
 
-      const inventory = await tx.inventoryOutbox.create({
+      await tx.inventoryOutbox.create({
         data: {
           aggregatetype: "products",
           aggregateid: product.id,
@@ -281,7 +284,6 @@ export class ProductService {
           },
         },
       });
-      console.log(inventory)
     });
 
     return {
@@ -292,7 +294,7 @@ export class ProductService {
   async unachive_product(
     call: ServerUnaryCall<ProductRequest, achiveResponseI>,
   ): Promise<achiveResponseI> {
-    const product = await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx) => {
       const product = await tx.products.update({
         where: {
           id: call.request.id,

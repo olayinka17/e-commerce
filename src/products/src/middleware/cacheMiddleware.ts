@@ -5,7 +5,7 @@ import { CatchAsync } from "../utils/CatchAsync.js";
 export const productCache = CatchAsync<{}, any, {}, {}>(
   async (req: Request, res: Response, next: NextFunction) => {
     const redisKey: string = `products:${req.originalUrl}`;
-
+    await redis.del(redisKey);
     const cachedResponse = await redis.get(redisKey);
 
     if (cachedResponse) {

@@ -3,9 +3,8 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// ---------------------
 // Send Password Reset OTP
-// ---------------------
+
 export const sendResetEmail = async (email: string, otp: number) => {
   const html = `
     <!DOCTYPE html>
@@ -31,7 +30,7 @@ export const sendResetEmail = async (email: string, otp: number) => {
       html,
     });
 
-    console.log("✅ Password reset email sent to:", email);
+    console.log("Password reset email sent to:", email);
     return { success: true };
   } catch (error) {
     console.error("Error sending password reset email:", error);
@@ -39,9 +38,7 @@ export const sendResetEmail = async (email: string, otp: number) => {
   }
 };
 
-// ---------------------
-// Send Patient Verification OTP
-// ---------------------
+// Send User Verification OTP
 export const sendUserEmail = async (email: string, otp: number) => {
   const html = `
     <!DOCTYPE html>
@@ -94,8 +91,6 @@ export const sendWelcome = async (email: string) => {
       subject: "Welcome",
       html,
     });
-
-    // return { success: true };
   } catch (error) {
     console.error("Error sending verification email:", error);
     throw error;
