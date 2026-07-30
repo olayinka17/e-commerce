@@ -1,3 +1,5 @@
+import fs from 'fs'
+import path from 'path'
 import { prisma } from "./prisma.js";
 import { Decimal } from "@prisma/client/runtime/index-browser";
 import axios from "axios";
@@ -52,6 +54,17 @@ function should_retry_payment(err: any) {
   return false;
 }
 
+function getSecret(secretName: string) {
+  try {
+    // Docker mounts secrets to /run/secrets/ by default
+    const secretPath = path.join('/run/secrets', secretName);
+    return fs.readFileSync(secretPath, 'utf8').trim();
+  } catch (err) {
+    // Fallback to environment variables for local development flexibility
+    return process.env[secretName]; 
+  }
+}
+
 const paystack_request = async (data: object, headers: object) => {
   const response = await axios.post(
     "https://api.paystack.co/transaction/initialize",
@@ -93,6 +106,7 @@ const retry_verify = await retry_function(
   ["ECONNABORTED", "ECONNRESET", "ENOTFOUND", "ETIMEOUT"],
 );
 
+const paystack_secrets = getSecret("PAYSTACK_SECRET_KEY")
 export const payment = async (
   order: OrderI,
   email: string,
@@ -100,8 +114,9 @@ export const payment = async (
   event_id: string,
 ) => {
   let transaction: Partial<Transactions> | null = null;
+
   const headers = {
-    Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+    Authorization: `Bearer ${paystack_secrets as string}`,
   };
 
   const publisher = new Redis({
@@ -386,7 +401,7 @@ export const payment = async (
 };
 
 export const paystackWebhook = async (body: ResponseI, signature: string) => {
-  const hash = createHmac("sha512", process.env.PAYSTACK_SECRET_KEY as string)
+  const hash = createHmac("sha512", paystack_secrets as string)
     .update(JSON.stringify(body))
     .digest("hex");
 

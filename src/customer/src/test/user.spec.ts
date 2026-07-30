@@ -5,6 +5,8 @@ import { redis } from "../utils/redis.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client.js";
 import bcrypt from "bcryptjs";
+import { PostgreSqlContainer } from "@testcontainers/postgresql";
+
 import { generateOTP } from "../utils/otp.js";
 
 const connectionString = `${process.env.DATABASE_URL}`;
@@ -13,7 +15,17 @@ const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ adapter });
 
 describe("user endpoints", () => {
+  let postgresqlContainer: any;
   beforeAll(async () => {
+    postgresqlContainer = await new PostgreSqlContainer("postgres:18-alpine")
+      .withNetworkAliases("postgres-db")
+      .withDatabase("customer")
+      .withUsername("postgres")
+      .withPassword("password")
+      .start();
+
+    const dynamicDbUrl = `postgresql://postgres:password@${postgresqlContainer.getHost()}:${postgresqlContainer.getMappedPort(5432)}/customer`;
+    process.env.CUSTOMER_DATABASE_URL = dynamicDbUrl;
     const hashedPassword = bcrypt.hashSync("123456789", 10);
     await prisma.user.create({
       data: {
@@ -28,6 +40,7 @@ describe("user endpoints", () => {
 
   afterAll(async () => {
     // Disconnect cleanly so Jest doesn't hang
+    if(postgresqlContainer) await postgresqlContainer.stop()
     await prisma.user.deleteMany();
     await prisma.$disconnect();
   });

@@ -152,7 +152,7 @@ describe("shopping test", () => {
 
       const dbName = postgresqlContainer.getName().replace(/^\//, "");
       const dynamicUrl = `postgresql://postgres:password@${postgresqlContainer.getHost()}:${postgresqlContainer.getMappedPort(5432)}/shopping`;
-      process.env.DATABASE_URL = dynamicUrl;
+      process.env.SHOPPING_DATABASE_URL = dynamicUrl;
       execSync("npx prisma migrate dev", {
         env: {
           ...process.env,

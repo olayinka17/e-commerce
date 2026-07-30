@@ -1,7 +1,23 @@
+import fs from 'fs'
+import path from 'path'
 import "dotenv/config";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+
+function getSecret(secretName: string) {
+  try {
+    // Docker mounts secrets to /run/secrets/ by default
+    const secretPath = path.join('/run/secrets', secretName);
+    return fs.readFileSync(secretPath, 'utf8').trim();
+  } catch (err) {
+    // Fallback to environment variables for local development flexibility
+    return process.env[secretName]; 
+  }
+}
+
+const resend_api_key = getSecret("RESEND_API_KEY") as string
+
+const resend = new Resend(resend_api_key);
 
 // Send Password Reset OTP
 

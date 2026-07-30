@@ -1,9 +1,25 @@
+import fs from 'fs'
+import path from 'path'
 import type { Request, Response, NextFunction } from "express";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 import "dotenv/config";
 
+function getSecret(secretName: string) {
+  try {
+    // Docker mounts secrets to /run/secrets/ by default
+    const secretPath = path.join('/run/secrets', secretName);
+    return fs.readFileSync(secretPath, 'utf8').trim();
+  } catch (err) {
+    // Fallback to environment variables for local development flexibility
+    return process.env[secretName]; 
+  }
+}
+
+const jwt_secret = getSecret("JWT_SECRET") as string
+
+
 const signToken = (id: string) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || "jwt_secret", {
+  return jwt.sign({ id }, jwt_secret || "jwt_secret", {
     expiresIn: process.env.JWT_EXPIRES_IN as unknown as number,
   });
 };

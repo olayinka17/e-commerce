@@ -4,6 +4,7 @@ import { Network } from "testcontainers";
 import type { ServiceError } from "@grpc/grpc-js";
 import { KafkaContainer } from "@testcontainers/kafka";
 import { PostgreSqlContainer } from "@testcontainers/postgresql";
+
 import { Kafka, logLevel, type Consumer, type Producer } from "kafkajs";
 import { Topics } from "@enterprise/kafka-common";
 import { v4 as uuidv4 } from "uuid";
@@ -89,7 +90,7 @@ describe("inventory test", () => {
         .start();
 
       const dynamicDbUrl = `postgresql://postgres:password@${postgresqlContainer.getHost()}:${postgresqlContainer.getMappedPort(5432)}/inventory`;
-      process.env.DATABASE_URL = dynamicDbUrl;
+      process.env.INVENTORY_DATABASE_URL = dynamicDbUrl;
       console.log("pushing Prisma schema to test container...");
       console.log(process.env.DATABASE_URL);
       execSync("npx prisma db push", {
