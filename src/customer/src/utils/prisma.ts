@@ -20,5 +20,5 @@ const connectionString = getSecret("CUSTOMER_DATABASE_URL") as string
 
 const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ adapter });
-
+console.log("hhhdd")
 export { prisma };

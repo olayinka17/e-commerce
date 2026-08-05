@@ -1,11 +1,10 @@
 version: "3.8"
 networks:
   ecommerce-network:
-    driver: overlay
-    driver_opts:
-      encrypted: "true"
+    external: true
 volumes:
   ecommerce-data:
+  cache-data:
   controller0-data:
   controller1-data:
   controller2-data:
@@ -21,7 +20,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "kafka-broker-api-versions.sh --bootstrap-server kafka:9001 || exit 1",
+          "kafka-broker-api-versions.sh --bootstrap-server controller-0:9001 || exit 1",
         ]
       interval: 15s
       timeout: 10s
@@ -33,12 +32,12 @@ services:
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
       KAFKA_CFG_LISTENERS: "CONTROLLER://:9001"
       KAFKA_CFG_ADVERTISED_LISTENERS: "CONTROLLER://controller-0:9001"
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@controller-0:9001,2@controller-1:9002,3@controller-2"
-      KAFKA_CFG_CONTROLLER_BOOTSTRAP-SERVERS: "controller-0:9001"
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@controller-0:9001,2@controller-1:9002,3@controller-2:9003"
+      KAFKA_CFG_CONTROLLER_BOOTSTRAP_SERVERS: "controller-0:9001"
       KAFKA_CFG_CLUSTER_ID: "GCtgBeRZSsq7wLCsyNtdUg"
-    volume:
+    volumes:
       - controller0-data:/bitnami/kafka
-    network:
+    networks:
       - ecommerce-network
   controller-1:
     image: "bitnami/kafka:latest"
@@ -46,7 +45,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "kafka-broker-api-versions.sh --bootstrap-server kafka:9002 || exit 1",
+          "kafka-broker-api-versions.sh --bootstrap-server controller-1:9002 || exit 1",
         ]
       interval: 15s
       timeout: 10s
@@ -57,21 +56,22 @@ services:
       KAFKA_CFG_PROCESS_ROLES: "controller"
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
       KAFKA_CFG_LISTENERS: "CONTROLLER://:9002"
-      KAFKA_CFG_ADVERTISED_LISTENERS: "CONTROLLER://controller-0:9002"
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@controller-0:9001,2@controller-1:9002,3@controller-2"
-      KAFKA_CFG_CONTROLLER_BOOTSTRAP-SERVERS: "controller-0:9002"
+      KAFKA_CFG_ADVERTISED_LISTENERS: "CONTROLLER://controller-1:9002"
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@controller-0:9001,2@controller-1:9002,3@controller-2:9003"
+      KAFKA_CFG_CONTROLLER_BOOTSTRAP_SERVERS: "controller-1:9002"
       KAFKA_CFG_CLUSTER_ID: "GCtgBeRZSsq7wLCsyNtdUg"
-    volume:
+    volumes:
       - controller1-data:/bitnami/kafka
-    network:
+    networks:
       - ecommerce-network
+
   controller-2:
     image: "bitnami/kafka:latest"
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "kafka-broker-api-versions.sh --bootstrap-server kafka:9003 || exit 1",
+          "kafka-broker-api-versions.sh --bootstrap-server controller-2:9003 || exit 1",
         ]
       interval: 15s
       timeout: 10s
@@ -82,13 +82,13 @@ services:
       KAFKA_CFG_PROCESS_ROLES: "controller"
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
       KAFKA_CFG_LISTENERS: "CONTROLLER://:9003"
-      KAFKA_CFG_ADVERTISED_LISTENERS: "CONTROLLER://controller-0:9003"
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@controller-0:9001,2@controller-1:9002,3@controller-2"
-      KAFKA_CFG_CONTROLLER_BOOTSTRAP-SERVERS: "controller-0:9003"
+      KAFKA_CFG_ADVERTISED_LISTENERS: "CONTROLLER://controller-2:9003"
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@controller-0:9001,2@controller-1:9002,3@controller-2:9003"
+      KAFKA_CFG_CONTROLLER_BOOTSTRAP_SERVERS: "controller-2:9003"
       KAFKA_CFG_CLUSTER_ID: "GCtgBeRZSsq7wLCsyNtdUg"
-    volume:
-      - controller3-data:/bitnami/kafka
-    network:
+    volumes:
+      - controller2-data:/bitnami/kafka
+    networks:
       - ecommerce-network
 
   server-0:
@@ -97,7 +97,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "kafka-broker-api-versions.sh --bootstrap-server kafka:9092 || exit 1",
+          "kafka-broker-api-versions.sh --bootstrap-server server-0:9092 || exit 1",
         ]
       interval: 15s
       timeout: 10s
@@ -111,27 +111,25 @@ services:
       KAFKA_CFG_LISTENERS: "PLAINTEXT://:9092"
       KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT"
       KAFKA_CFG_ADVERTISED_LISTENERS: "PLAINTEXT://server-0:9092"
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@controller-0:9001,2@controller-1:9002,3@controller-2"
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@controller-0:9001,2@controller-1:9002,3@controller-2:9003"
       # KAFKA_CFG_CONTROLLER_BOOTSTRAP-SERVERS: 'controller-0:9003'
       KAFKA_CFG_CLUSTER_ID: "GCtgBeRZSsq7wLCsyNtdUg"
-    volume:
+    volumes:
       - server0-data:/bitnami/kafka
-    network:
+    networks:
       - ecommerce-network
     depends_on:
-      controller-0:
-        condition: service_healthy
-      controller-1:
-        condition: service_healthy
-      controller-2:
-        condition: service_healthy
+      - controller-0
+      - controller-1
+      - controller-2
+
   server-1:
     image: "bitnami/kafka:latest"
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "kafka-broker-api-versions.sh --bootstrap-server kafka:9093 || exit 1",
+          "kafka-broker-api-versions.sh --bootstrap-server server-1:9093 || exit 1",
         ]
       interval: 15s
       timeout: 10s
@@ -145,27 +143,24 @@ services:
       KAFKA_CFG_LISTENERS: "PLAINTEXT://:9093"
       KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT"
       KAFKA_CFG_ADVERTISED_LISTENERS: "PLAINTEXT://server-1:9093"
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@controller-0:9001,2@controller-1:9002,3@controller-2"
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@controller-0:9001,2@controller-1:9002,3@controller-2:9003"
       # KAFKA_CFG_CONTROLLER_BOOTSTRAP-SERVERS: 'controller-0:9003'
       KAFKA_CFG_CLUSTER_ID: "GCtgBeRZSsq7wLCsyNtdUg"
-    volume:
+    volumes:
       - server1-data:/bitnami/kafka
-    network:
+    networks:
       - ecommerce-network
     depends_on:
-      controller-0:
-        condition: service_healthy
-      controller-1:
-        condition: service_healthy
-      controller-2:
-        condition: service_healthy
+      - controller-0
+      - controller-1
+      - controller-2
   server-2:
     image: "bitnami/kafka:latest"
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "kafka-broker-api-versions.sh --bootstrap-server kafka:9094 || exit 1",
+          "kafka-broker-api-versions.sh --bootstrap-server server-2:9094 || exit 1",
         ]
       interval: 15s
       timeout: 10s
@@ -178,28 +173,26 @@ services:
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
       KAFKA_CFG_LISTENERS: "PLAINTEXT://:9094"
       KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT"
-      KAFKA_CFG_ADVERTISED_LISTENERS: "PLAINTEXT://server-0:9094"
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@controller-0:9001,2@controller-1:9002,3@controller-2"
+      KAFKA_CFG_ADVERTISED_LISTENERS: "PLAINTEXT://server-2:9094"
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@controller-0:9001,2@controller-1:9002,3@controller-2:9003"
       # KAFKA_CFG_CONTROLLER_BOOTSTRAP-SERVERS: 'controller-0:9003'
       KAFKA_CFG_CLUSTER_ID: "GCtgBeRZSsq7wLCsyNtdUg"
-    volume:
+    volumes:
       - server2-data:/bitnami/kafka
-    network:
+    networks:
       - ecommerce-network
     depends_on:
-      controller-0:
-        condition: service_healthy
-      controller-1:
-        condition: service_healthy
-      controller-2:
-        condition: service_healthy
+      - controller-0
+      - controller-1
+      - controller-2
+
   server-3:
     image: bitnami/kafka:latest
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "kafka-broker-api-versions.sh --bootstrap-server kafka:9095 || exit 1",
+          "kafka-broker-api-versions.sh --bootstrap-server server-3:9095 || exit 1",
         ]
       interval: 15s
       timeout: 10s
@@ -212,38 +205,34 @@ services:
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
       KAFKA_CFG_LISTENERS: "PLAINTEXT://:9095"
       KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT"
-      KAFKA_CFG_ADVERTISED_LISTENERS: "PLAINTEXT://server-0:9095"
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@controller-0:9001,2@controller-1:9002,3@controller-2"
+      KAFKA_CFG_ADVERTISED_LISTENERS: "PLAINTEXT://server-3:9095"
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@controller-0:9001,2@controller-1:9002,3@controller-2:9003"
       # KAFKA_CFG_CONTROLLER_BOOTSTRAP-SERVERS: 'controller-0:9003'
       KAFKA_CFG_CLUSTER_ID: "GCtgBeRZSsq7wLCsyNtdUg"
-    volume:
+    volumes:
       - server3-data:/bitnami/kafka
-    network:
+    networks:
       - ecommerce-network
     depends_on:
-      controller-0:
-        condition: service_healthy
-      controller-1:
-        condition: service_healthy
-      controller-2:
-        condition: service_healthy
+      - controller-0
+      - controller-1
+      - controller-2
+
   init-kafka:
     image: bitnami/kafka:latest
     volumes:
       - ./create_kafka_topics.sh:/usr/local/bin/create_kafka_topics.sh:ro
     entrypoint: ["/bin/bash", "/usr/local/bin/create_kafka_topics.sh"]
     depends_on:
-      server-0:
-        condition: service_healthy
-      server-1:
-        condition: service_healthy
-      server-2:
-        condition: service_healthy
-      server-3:
-        condition: service_healthy
-    network:
+      - server-0
+      - server-1
+      - server-2
+      - server-3
+    networks:
       - ecommerce-network
-  postgres:
+    
+    
+  postgresdb:
     image: postgres:18
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
@@ -254,9 +243,10 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
-      POSTGRES_MULTIPLE_DATABASES: products,inventory,customer,shopping
+      POSTGRES_MULTIPLE_DATABASES: product,inventory,customer,shopping
     volumes:
-      - ./init_dbs.sh:/docker-entrypmmit-initdb.d/init_dbs.sh:ro
+      - ./init_dbs.sh:/docker-entrypoint-initdb.d/init_dbs.sh:ro
+      - ./setup_hba.sh:/docker-entrypoint-initdb.d/setup_hba.sh:ro
       - ecommerce-data:/var/lib/postgresql/data
     command:
       [
@@ -268,22 +258,19 @@ services:
         "-c",
         "max_wal_senders=10",
       ]
+    networks:
+      - ecommerce-network
 
   kafka-connect:
     image: quay.io/debezium/connect@sha256:bd0ef1f8aa0690bc9bc0dec78c209f24f5d53ffd40fe5bc36c22db87052a51ad
-    port:
+    ports:
       - "8083:8083"
     depends_on:
-      server-0:
-        condition: service_healthy
-      server-1:
-        condition: service_healthy
-      server-2:
-        condition: service_healthy
-      server-3:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
+      - server-0
+      - server-1
+      - server-2
+      - server-3
+      - postgresdb
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8083/connectors/ || exit 1"]
       interval: 30s
@@ -302,65 +289,60 @@ services:
       VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
       LISTENERS: HTTP://0.0.0.0:8083
       REST_ADVERTISED_LISTENERS: HTTP://0.0.0.0:8083
+    networks:
+      - ecommerce-network
 
   admin:
     image: admin
     depends_on:
-      server-0:
-        condition: service_healthy
-      server-1:
-        condition: service_healthy
-      server-2:
-        condition: service_healthy
-      server-3:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      deploy:
-        replicas: 3
-        update_config:
-          parallelism: 2
-          delay: 10s
-          failure_action: rollback
-        restart_policy:
-          condition: on-failure
-          max_attempts: 3
-          delay: 3s
-          window: 120s
+      - server-0
+      - server-1
+      - server-2
+      - server-3
+      - postgresdb
+      - redis
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 2
+        delay: 10s
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+        delay: 3s
+        window: 120s
     networks:
       - ecommerce-network
     environment:
       PORT: 4092
       NODE_ENV: production
+      SHOPPING_CLIENT: "localhost"
+      INVENTORY_CLIENT: "localhost"
+      PRODUCT_CLIENT: "localhost"
+      REDIS_HOST: "redis"
+      REDIS_PORT: 6379
 
   customer:
     image: customer
     depends_on:
-      server-0:
-        condition: service_healthy
-      server-1:
-        condition: service_healthy
-      server-2:
-        condition: service_healthy
-      server-3:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      deploy:
-        replicas: 3
-        update_config:
-          parallelism: 2
-          delay: 10s
-          failure_action: rollback
-        restart_policy:
-          condition: on-failure
-          max_attempts: 3
-          delay: 3s
-          window: 120s
+      - server-0
+      - server-1
+      - server-2
+      - server-3
+      - postgresdb
+      - redis
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 2
+        delay: 10s
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+        delay: 3s
+        window: 120s
     networks:
       - ecommerce-network
     environment:
@@ -368,143 +350,130 @@ services:
       NODE_ENV: production
       JWT_EXPIRES_IN: 1h
       KAFKA_BROKERS: "server-0:9092,server-1:9093,server-2:9094,server-3:9095"
+      REDIS_HOST: "redis"
+      REDIS_PORT: 6379
 
   inventory:
     image: inventory
     depends_on:
-      server-0:
-        condition: service_healthy
-      server-1:
-        condition: service_healthy
-      server-2:
-        condition: service_healthy
-      server-3:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      deploy:
-        replicas: 3
-        update_config:
-          parallelism: 2
-          delay: 10s
-          failure_action: rollback
-        restart_policy:
-          condition: on-failure
-          max_attempts: 3
-          delay: 3s
-          window: 120s
+      - server-0
+      - server-1
+      - server-2
+      - server-3
+      - postgresdb
+      - redis
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 2
+        delay: 10s
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+        delay: 3s
+        window: 120s
     networks:
       - ecommerce-network
-    environments:
+    environment:
       KAFKA_BROKERS: "server-0:9092,server-1:9093,server-2:9094,server-3:9095"
+      GRPC_HOST: "inventory"
 
   orchestrator:
     image: orchestrator
     depends_on:
-      server-0:
-        condition: service_healthy
-      server-1:
-        condition: service_healthy
-      server-2:
-        condition: service_healthy
-      server-3:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      deploy:
-        replicas: 3
-        update_config:
-          parallelism: 2
-          delay: 10s
-          failure_action: rollback
-        restart_policy:
-          condition: on-failure
-          max_attempts: 3
-          delay: 3s
-          window: 120s
+      - server-0
+      - server-1
+      - server-2
+      - server-3
+      - postgresdb
+      - redis
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 2
+        delay: 10s
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+        delay: 3s
+        window: 120s
     networks:
       - ecommerce-network
-
-  products:
+    environment:
+      KAFKA_BROKERS: "server-0:9092,server-1:9093,server-2:9094,server-3:9095"
+  product:
     image: products
     depends_on:
-      server-0:
-        condition: service_healthy
-      server-1:
-        condition: service_healthy
-      server-2:
-        condition: service_healthy
-      server-3:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      deploy:
-        replicas: 3
-        update_config:
-          parallelism: 2
-          delay: 10s
-          failure_action: rollback
-        restart_policy:
-          condition: on-failure
-          max_attempts: 3
-          delay: 3s
-          window: 120s
+      - server-0
+      - server-1
+      - server-2
+      - server-3
+      - postgresdb
+      - redis
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 2
+        delay: 10s
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+        delay: 3s
+        window: 120s
     networks:
       - ecommerce-network
-    environments:
+    environment:
       PORT: 4094
       NODE_ENV: production
+      GRPC_HOST: "product"
+      REDIS_HOST: "redis"
+      REDIS_PORT: 6379
 
   shopping:
     image: shopping
     depends_on:
-      server-0:
-        condition: service_healthy
-      server-1:
-        condition: service_healthy
-      server-2:
-        condition: service_healthy
-      server-3:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      deploy:
-        replicas: 3
-        update_config:
-          parallelism: 2
-          delay: 10s
-          failure_action: rollback
-        restart_policy:
-          condition: on-failure
-          max_attempts: 3
-          delay: 3s
-          window: 120s
+      - server-0
+      - server-1
+      - server-2
+      - server-3
+      - postgresdb
+      - redis
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 2
+        delay: 10s
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+        delay: 3s
+        window: 120s
     networks:
       - ecommerce-network
-    environments:
+    environment:
       PORT: 4095
       NODE_ENV: production
       KAFKA_BROKERS: "server-0:9092,server-1:9093,server-2:9094,server-3:9095"
+      GRPC_HOST: "shopping"
+      PRODUCT_CLIENT: "localhost"
+      REDIS_HOST: "redis"
+      REDIS_PORT: 6379
 
-
-  redis: 
+  redis:
     image: redis:alpine
     deploy:
-      replica: 2
-    network:
+      replicas: 2
+    networks:
       - ecommerce-network
-    volume:
-      - ecommerce-data:/data
+    volumes:
+      - cache-data:/data
+  
   nginx-proxy:
-    image: nginx
+    image: proxy
     depends_on:
       - admin
       - customer
@@ -519,7 +488,5 @@ services:
         mode: host
     deploy:
       mode: global
-    network:
+    networks:
       - ecommerce-network
-
-

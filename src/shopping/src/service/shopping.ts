@@ -1,3 +1,4 @@
+import "dotenv/config"
 import { prisma } from "../utils/prisma.js";
 import {
   Status,
@@ -554,8 +555,8 @@ export class ShoppingService {
         const channelName = `order_payment_url:${correlation_id}`;
 
         const subscriber = new Redis({
-          host: "localhost",
-          port: 6379,
+          host: process.env["REDIS_HOST"] as string,
+          port: process.env["REDIS_PORT"] as unknown as number,
         });
 
         subscriber.subscribe(channelName, (err, count) => {
@@ -568,7 +569,8 @@ export class ShoppingService {
         const waitForURL = new Promise<string | null>((resolve, reject) => {
           const timeout = setTimeout(async () => {
             await subscriber.unsubscribe(channelName);
-            subscriber.disconnect();
+            //subscriber.disconnect();
+            await subscriber.quit();
             reject(
               new CustomError("Timed out waiting for payment gateway", 504),
             );

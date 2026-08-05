@@ -1,0 +1,147 @@
+name: Build and Deploy
+
+on: 
+  push:
+    branches:
+      - main
+
+
+jobs:
+
+  changes: 
+    defaults:
+      run:
+        shell: bash
+    runs-on: self-hosted
+    outputs:
+      services: ${{ steps.set-services.outputs.services }}
+      # admin: ${{ steps.filter.outputs.admin }}
+      # customer: ${{ steps.filter.outputs.customer }}
+      # inventory: ${{ steps.filter.outputs.inventory }}
+      # orchestrator: ${{ steps.filter.outputs.orchestrator }}
+      # product: ${{ steps.filter.outputs.product }}
+      # shopping: ${{ steps.filter.outputs.shopping }}
+      # kafka-package: ${{ steps.filter.outputs.kafka-package }}
+  
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            admin: 
+              - 'src/admin/**'
+              - 'packages/kafka-common/**'
+            customer: 
+              - 'src/customer/**'
+              - 'packages/kafka-common/**'
+            inventory: 
+              - 'src/inventory/**'
+              - 'packages/kafka-common/**'
+            orchestrator: 
+              - 'src/orchestrator/**'
+              - 'packages/kafka-common/**'
+            products: 
+              - 'src/products/**'
+              - 'packages/kafka-common/**'
+            shopping: 
+              - 'src/shopping/**'
+              - 'packages/kafka-common/**'
+            proxy:
+              - 'proxy/**'
+            # kafka-package: 'packages/kafka-common'
+        
+      - id: set-services
+        run: |
+          services=()
+
+          if [[ "${{ steps.filter.outputs.admin }}" == "true" ]]; then
+            services+=("admin")
+          fi
+          if [[ "${{ steps.filter.outputs.customer }}" == "true" ]]; then
+            services+=("customer")
+          fi
+          if [[ "${{ steps.filter.outputs.inventory }}" == "true" ]]; then
+            services+=("inventory")
+          fi
+          if [[ "${{ steps.filter.outputs.orchestrator }}" == "true" ]]; then
+            services+=("orchestrator")
+          fi
+          if [[ "${{ steps.filter.outputs.products }}" == "true" ]]; then
+            services+=("products")
+          fi
+          if [[ "${{ steps.filter.outputs.shopping }}" == "true" ]]; then
+            services+=("shopping")
+          fi
+          if [[ "${{ steps.filter.outputs.proxy }}" == "true" ]]; then
+            services+=("proxy")
+          fi
+
+          if [ "${#services[@]}" -eq 0 ]; then
+            echo "services=[]" >> $GITHUB_OUTPUT
+          else
+            echo "services=$(printf '%s\n' "${services[@]}" | jq -R . | jq -s .)" >> $GITHUB_OUTPUT
+          fi
+
+  build-and-test-services:
+    defaults:
+      run:
+        shell: bash
+    needs: changes
+    if: ${{ needs.changes.outputs.services != '[]' && needs.changes.outputs.services != '' }}
+    uses: ./.github/workflows/build_ci.yml
+    with:
+      service-name: ${{ matrix.service }}
+      node-version: '20'    
+      image-name: ecommerce/${{ matrix.service }}
+      stack-name: ecommerce
+      github-sha: ${{ github.sha }}
+    secrets: inherit
+    strategy:
+      matrix:
+        service: ${{ fromJSON(needs.changes.outputs.services) }}
+  
+  deploy-to-docker-swarm:
+    defaults:
+      run:
+        shell: bash
+    needs: build-and-test-services
+    runs-on: self-hosted
+    steps: 
+      - name: Initialize Docker Swarm if not already
+        run: |
+          export DOCKER_HOST="ssh://ubuntu@${{ secrets.SWARM_MANAGER_IP }}"
+          if ! docker node ls > /dev/null 2>&1; then
+            docker swarm init
+          fi
+
+      - name: Ensure Docker secrets exist
+        run: |
+          create_secret () {
+          NAME=$1
+          VALUE=$2
+          export DOCKER_HOST="ssh://ubuntu@${{ secrets.SWARM_MANAGER_IP }}"
+          if ! docker secret inspect $NAME > /dev/null 2>&1; then
+            echo "$VALUE" | docker secret create "$NAME" -
+          fi
+          }
+
+          create_secret RESEND_API_KEY "${{ secrets.RESEND_API_KEY }}"
+          create_secret JWT_KEY "${{ secrets.JWT_KEY }}"
+          create_secret CUSTOMER_DATABASE_URL "${{ secrets.CUSTOMER_DATABASE_URL }}"
+          create_secret INVENTORY_DATABASE_URL "${{ secrets.INVENTORY_DATABASE_URL }}"
+          create_secret PRODUCT_DATABASE_URL "${{ secrets.PRODUCT_DATABASE_URL }}"
+          create_secret SHOPPING_DATABASE_URL "${{ secrets.SHOPPING_DATABASE_URL }}"
+          create_secret PAYSTACK_SECRET_KEY "${{ secrets.PAYSTACK_SECRET_KEY }}"
+
+      - name: Deploy to Docker Swarm
+        run: |
+          export DOCKER_HOST="ssh://ubuntu@${{ secrets.SWARM_MANAGER_IP }}"
+          docker stack deploy --with-registry-auth -c docker-compose.yml ecommerce
+      
+      - name: Verify services are running
+        run: |
+          export DOCKER_HOST="ssh://ubuntu@${{ secrets.SWARM_MANAGER_IP }}"
+          docker stack services ecommerce
+      

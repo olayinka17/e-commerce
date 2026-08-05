@@ -84,7 +84,6 @@ export const subscribeEvent = async (kafkaService: KafkaService) => {
         default:
           break;
       }
-
       await consumer.commitOffsets([
         { topic, partition, offset: (Number(message.offset) + 1).toString() },
       ]);

@@ -76,7 +76,6 @@ export class AdminService {
     price,
     sku,
   }: ProductI) => {
-    console.log(category_id);
     const product: ProductsI = await createProducts({
       name,
       category_id,
@@ -84,7 +83,6 @@ export class AdminService {
       price,
       sku,
     });
-    console.log(product.price);
     return { ...product, price: Number(product.price) };
   };
 

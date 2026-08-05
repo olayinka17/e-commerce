@@ -7,17 +7,25 @@ const PROTO_PATH = path.join(
   "src/grpc/product.proto"
 )
 
+let client: any;
+
 export const startPrductsGrpcClient = async () => {
     const packageDef = protoloader.loadSync(PROTO_PATH, {longs: String,keepCase: true})
 
     const grpcObject = grpc.loadPackageDefinition(packageDef) as any;
 
     const adminProductPackage = grpcObject.productsPackage
-
-    const client = new adminProductPackage.AdminProduct(
-        "localhost:40098",
+    const host = process.env.PRODUCT_CLIENT
+    client = new adminProductPackage.AdminProduct(
+        `${host}:40098`,
         grpc.credentials.createInsecure()
     )
 
     return client
+}
+
+export const shutdownGRPCProductClient = async (client: any) => {
+  if (client) {
+    client.close();
+  }
 }

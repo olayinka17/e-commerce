@@ -1,26 +1,31 @@
 import { KafkaService } from "@enterprise/kafka-common";
 import { subscribeEvent } from "./subscriber.js";
-process.on("uncaughtException", (err) => {
-  console.log(err.name, err.message);
-  console.log("UNCAUGHT EXCEPTION. Shutting down...");
-  process.exit(1);
-});
-const kafkaService = new KafkaService({
-  clientId: "orchestrator-service",
-  brokers: process.env.KAFKA_BROKERS
-    ? process.env.KAFKA_BROKERS.split(",")
-    : [],
-});
 
-await kafkaService.connect();
+let kafkaService: KafkaService;
 
-await subscribeEvent(kafkaService).catch((error) => {
-  kafkaService.disconnect();
-  console.error("Error subscribing to events:", error);
-});
-process.on("unhandledRejection", (err: any) => {
-  console.log(err.name, err.message);
-  console.log("UNHANDLED REJECTION. Shutting down...");
-  kafkaService.disconnect();
-  process.exit(1);
-});
+export async function bootstrap() {
+  kafkaService = new KafkaService({
+    clientId: "orchestrator-service",
+    brokers: process.env.KAFKA_BROKERS
+      ? process.env.KAFKA_BROKERS.split(",")
+      : [],
+  });
+
+  await kafkaService.connect();
+  await subscribeEvent(kafkaService).catch(async(error) => {
+    await kafkaService.disconnect();
+    await kafkaService.disconnectConsumer();
+    console.error("Error subscribing to events:", error);
+  });
+}
+
+export async function shutdown() {
+  await kafkaService.disconnect();
+  await kafkaService.disconnectConsumer();
+  console.log("Kafka service disconnected. Shutting down...");
+ // process.exit(0);
+}
+// await subscribeEvent(kafkaService).catch((error) => {
+//   kafkaService.disconnect();
+//   console.error("Error subscribing to events:", error);
+// });

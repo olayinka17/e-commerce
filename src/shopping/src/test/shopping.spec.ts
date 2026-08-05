@@ -5,6 +5,7 @@ import request from "supertest";
 import { Network, GenericContainer, Wait } from "testcontainers";
 import { KafkaContainer } from "@testcontainers/kafka";
 import { PostgreSqlContainer } from "@testcontainers/postgresql";
+import { RedisContainer } from "@testcontainers/redis";
 import { Kafka, logLevel, type Producer } from "kafkajs";
 import * as grpc from "@grpc/grpc-js";
 import * as protoloader from "@grpc/proto-loader";
@@ -14,7 +15,7 @@ import type { ServiceError } from "@grpc/grpc-js";
 import type { sendUnaryData, ServerUnaryCall } from "@grpc/grpc-js";
 import { v4 as uuidv4 } from "uuid";
 import { Topics } from "@enterprise/kafka-common";
-import { bootstrap } from "../utils/bootstrap.js";
+import { bootstrap, shutdown } from "../utils/bootstrap.js";
 
 interface ProductRequest {
   id: string;
@@ -117,6 +118,7 @@ describe("shopping test", () => {
   let postgresqlContainer: any;
   let kafkaContainer: any;
   let debeziumContainer: any;
+  let redisContainer: any;
   let kafkaClient: Kafka;
   let producer: Producer;
   let prisma: PrismaClient;
@@ -126,10 +128,18 @@ describe("shopping test", () => {
   let serverConfig: any;
   let product_id: string = uuidv4();
   let order_id: string;
+  let redisClient: any;
+  let kafkaService: any;
   beforeAll(
+    
     async () => {
       // Initializing shared Docker network
       network = await new Network().start();
+
+      redisContainer = await new RedisContainer("redis:7-alpine").start();
+
+      process.env.REDIS_HOST = redisContainer.getHost();
+      process.env.REDIS_PORT = redisContainer.getMappedPort(6379);
 
       kafkaContainer = await new KafkaContainer("confluentinc/cp-kafka:7.8.0")
         .withKraft()
@@ -175,7 +185,9 @@ describe("shopping test", () => {
         },
       );
 
-      debeziumContainer = await new GenericContainer("quay.io/debezium/connect@sha256:bd0ef1f8aa0690bc9bc0dec78c209f24f5d53ffd40fe5bc36c22db87052a51ad")
+      debeziumContainer = await new GenericContainer(
+        "quay.io/debezium/connect@sha256:bd0ef1f8aa0690bc9bc0dec78c209f24f5d53ffd40fe5bc36c22db87052a51ad",
+      )
         .withNetwork(network)
         .withExposedPorts(8083)
         .withEnvironment({
@@ -192,7 +204,9 @@ describe("shopping test", () => {
           KEY_CONVERTER_SCHEMAS_ENABLE: "false",
           VALUE_CONVERTER_SCHEMAS_ENABLE: "false",
         })
-        .withWaitStrategy(Wait.forHttp("/connectors", 8083).forStatusCode(200))
+        .withStartupTimeout(180000)
+        .withWaitStrategy(Wait.forLogMessage(/Kafka Connect started/))
+        // .withWaitStrategy(Wait.forHttp("/connectors", 8083).forStatusCode(200))
         .start();
       execSync(
         `docker exec ${kafkaName} /usr/bin/kafka-topics \
@@ -262,7 +276,7 @@ describe("shopping test", () => {
       prisma = prismaModule.prisma;
 
       const kafkaModule = await import("../utils/kafka.js");
-      const kafkaService = kafkaModule.kafkaService;
+      kafkaService = kafkaModule.kafkaService;
 
       await kafkaService.connect();
 
@@ -315,18 +329,26 @@ describe("shopping test", () => {
       });
       await bindServer(ProductsServer, "localhost:40098");
       await bootstrap();
+      const redisModule = await import("../utils/redis.js");
+      redisClient = redisModule.redis;
     },
     50 * 60 * 1000,
   );
 
   afterAll(
     async () => {
+      await kafkaService.disconnect()
+      await kafkaService.disconnectConsumer()
       if (kafkaContainer) await kafkaContainer.stop();
-
+      if (redisClient) await redisClient.quit();
+      if (ProductsServer)  ProductsServer.forceShutdown();
+      if (AdminClient) AdminClient.close()
       if (postgresqlContainer) await postgresqlContainer.stop();
       if (debeziumContainer) await debeziumContainer.stop();
+      if (redisContainer) await redisContainer.stop();
       await producer.disconnect();
       await network.stop();
+      await shutdown();
       await serverConfig.stopServer();
     },
     50 * 60 * 1000,

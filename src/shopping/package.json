@@ -37,6 +37,7 @@
     "@grpc/proto-loader": "^0.8.1",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
+    "@testcontainers/redis": "^12.0.4",
     "axios": "^1.16.1",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.4.2",

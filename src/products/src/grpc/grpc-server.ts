@@ -52,9 +52,10 @@ export const startGrpcServer = async () => {
       observer.createCategories,
     ),
   });
+  const host = process.env.GRPC_HOST
   await new Promise<void>((resolve, reject) => {
     server.bindAsync(
-      "localhost:40098",
+      `${host}:40098`,
       grpc.ServerCredentials.createInsecure(),
       (err, port) => {
         if (err) {

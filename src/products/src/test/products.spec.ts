@@ -6,7 +6,8 @@ import request from "supertest";
 import { Network, GenericContainer, Wait } from "testcontainers";
 import { KafkaContainer } from "@testcontainers/kafka";
 import { PostgreSqlContainer } from "@testcontainers/postgresql";
-import { Kafka } from "kafkajs";
+import { RedisContainer } from "@testcontainers/redis";
+import { Kafka, logLevel } from "kafkajs";
 import * as grpc from "@grpc/grpc-js";
 import * as protoloader from "@grpc/proto-loader";
 import axios from "axios";
@@ -47,6 +48,7 @@ describe("product test", () => {
   let network: any;
   let postgresqlContainer: any;
   let kafkaContainer: any;
+  let redisContainer: any;
   let debeziumContainer: any;
   let kafkaClient: Kafka;
   let prisma: PrismaClient;
@@ -56,6 +58,7 @@ describe("product test", () => {
   let product_id: string;
   let app: any;
   let serverConfig: any;
+  let redisClient: any;
   beforeAll(
     async () => {
       // Initializing shared Docker network
@@ -66,6 +69,11 @@ describe("product test", () => {
         .withNetworkMode(network.getName())
         .withNetworkAliases("kafka-broker")
         .start();
+
+      redisContainer = await new RedisContainer("redis:7-alpine").start();
+
+      process.env.REDIS_HOST = redisContainer.getHost();
+      process.env.REDIS_PORT = redisContainer.getMappedPort(6379).toString();
 
       // const startedKafkaContainer = await kafkaContainer.start();
 
@@ -87,7 +95,7 @@ describe("product test", () => {
       const dynamicDbUrl = `postgresql://postgres:password@${postgresqlContainer.getHost()}:${postgresqlContainer.getMappedPort(5432)}/products`;
       process.env.PRODUCT_DATABASE_URL = dynamicDbUrl;
       console.log("pushing Prisma schema to test container...");
-      console.log(process.env.DATABASE_URL);
+      console.log(process.env.PRODUCT_DATABASE_URL);
       execSync("npx prisma migrate dev", {
         env: {
           ...process.env,
@@ -129,7 +137,9 @@ describe("product test", () => {
           KEY_CONVERTER_SCHEMAS_ENABLE: "false",
           VALUE_CONVERTER_SCHEMAS_ENABLE: "false",
         })
-        .withWaitStrategy(Wait.forHttp("/connectors", 8083).forStatusCode(200))
+        .withStartupTimeout(180000)
+        .withWaitStrategy(Wait.forLogMessage(/Kafka Connect started/))
+        //.withWaitStrategy(Wait.forHttp("/connectors", 8083).forStatusCode(200))
         .start();
 
       execSync(
@@ -182,6 +192,7 @@ describe("product test", () => {
       kafkaClient = new Kafka({
         clientId: "shopping-test-service",
         brokers: [broker],
+        logLevel: logLevel.NOTHING
       });
 
       const prismaModule = await import("../utils/prisma.js");
@@ -193,6 +204,8 @@ describe("product test", () => {
       serverConfig = await import("../grpc/grpc-server.js");
 
       await serverConfig.startGrpcServer();
+      const redisModule = await import("../utils/redis.js");
+      redisClient = redisModule.redis;
 
       ProductClient = new productsPackage.Products(
         "localhost:40098",
@@ -213,8 +226,10 @@ describe("product test", () => {
       await prisma.products.deleteMany();
       await prisma.categories.deleteMany();
       await prisma.inventoryOutbox.deleteMany();
+      if (redisClient) await redisClient.quit();
       if (postgresqlContainer) await postgresqlContainer.stop();
       if (debeziumContainer) await debeziumContainer.stop();
+      if (redisContainer) await redisContainer.stop();
       await network.stop();
       await serverConfig.stopServer();
     },

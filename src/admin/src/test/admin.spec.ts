@@ -1,10 +1,11 @@
 import path from "path";
 import request from "supertest";
-import app from "../app.js";
+// import app from "../app.js";
 import * as grpc from "@grpc/grpc-js";
 import type { sendUnaryData, ServerUnaryCall } from "@grpc/grpc-js";
 import * as protoloader from "@grpc/proto-loader";
-import { boostrap } from "../utils/bootstrap.js";
+import { RedisContainer } from "@testcontainers/redis";
+import { bootstrap, shutdown } from "../utils/bootstrap.js";
 
 export interface PaginateI {
   limit: number;
@@ -143,7 +144,17 @@ describe("admin service", () => {
   let ProductsServer: grpc.Server;
   let shopping_server: grpc.Server;
   let inventoryServer: grpc.Server;
+  let redisContainer: any;
+  let app: any;
+  let redisClient: any;
+
   beforeAll(async () => {
+    redisContainer = await new RedisContainer("redis:7-alpine").start();
+    process.env.REDIS_HOST = redisContainer.getHost();
+    process.env.REDIS_PORT = redisContainer.getMappedPort(6379);
+
+    const appModule = await import("../app.js");
+    app = appModule.default;
     shopping_server = new grpc.Server();
     shopping_server.addService(AdminPackage.Admin.service, {
       totalOrders: (
@@ -151,13 +162,12 @@ describe("admin service", () => {
           PaginateI,
           { orders: OrderI[]; nextCursor: string | null }
         >,
-        
+
         callback: sendUnaryData<{
           orders: OrderI[];
           nextCursor: string | null;
         }>,
       ) => {
-        
         callback(null, {
           orders: [
             {
@@ -276,13 +286,18 @@ describe("admin service", () => {
       bindServer(ProductsServer, "localhost:40098"),
     ]);
 
-    await boostrap();
-  });
+    await bootstrap();
+    const redisModule = await import("../utils/redis.js");
+    redisClient = redisModule.redis
+  }, 5000);
   afterAll(async () => {
+    if (redisClient) await redisClient.quit();
+    if (redisContainer) await redisContainer.stop();
     if (ProductsServer) ProductsServer.forceShutdown();
     if (shopping_server) shopping_server.forceShutdown();
     if (inventoryServer) inventoryServer.forceShutdown();
-  });
+    await shutdown();
+  }, 5000);
 
   it("should return the total revenue", async () => {
     const response = await request(app)
@@ -422,7 +437,7 @@ describe("admin service", () => {
       )
       .send({
         name: "ola",
-        description: "ollaa"
+        description: "ollaa",
       });
 
     expect(response.statusCode).toBe(200);

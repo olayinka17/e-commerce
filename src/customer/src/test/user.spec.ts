@@ -1,23 +1,32 @@
+import { execSync } from "node:child_process";
 import "dotenv/config";
 import request from "supertest";
-import app from "../app.js";
-import { redis } from "../utils/redis.js";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../generated/prisma/client.js";
+// import app from "../app.js";
+// import { redis } from "../utils/redis.js";
 import bcrypt from "bcryptjs";
 import { PostgreSqlContainer } from "@testcontainers/postgresql";
-
+import { RedisContainer } from "@testcontainers/redis";
+import { Network } from "testcontainers";
 import { generateOTP } from "../utils/otp.js";
-
-const connectionString = `${process.env.DATABASE_URL}`;
-
-const adapter = new PrismaPg({ connectionString });
-const prisma = new PrismaClient({ adapter });
+import type { PrismaClient } from "../generated/prisma/client.js";
 
 describe("user endpoints", () => {
+  let network: any;
   let postgresqlContainer: any;
+  let redisContainer: any;
+  let prisma: PrismaClient;
+  let app: any;
+  let redis: any
   beforeAll(async () => {
+    network = await new Network().start();
+
+    redisContainer = await new RedisContainer("redis:7-alpine").start();
+
+    process.env.REDIS_HOST = redisContainer.getHost();
+    process.env.REDIS_PORT = redisContainer.getMappedPort(6379).toString();
+
     postgresqlContainer = await new PostgreSqlContainer("postgres:18-alpine")
+      .withNetwork(network)
       .withNetworkAliases("postgres-db")
       .withDatabase("customer")
       .withUsername("postgres")
@@ -26,6 +35,26 @@ describe("user endpoints", () => {
 
     const dynamicDbUrl = `postgresql://postgres:password@${postgresqlContainer.getHost()}:${postgresqlContainer.getMappedPort(5432)}/customer`;
     process.env.CUSTOMER_DATABASE_URL = dynamicDbUrl;
+    console.log(dynamicDbUrl);
+    console.log("pushing Prisma schema to test container...");
+    console.log(process.env["CUSTOMER_DATABASE_URL"]);
+    try {
+      execSync("npx prisma migrate dev", {
+        env: {
+          ...process.env,
+        },
+        stdio: "inherit",
+      });
+    } catch (error) {
+      console.log(error);
+      process.exit(1);
+    }
+    console.log("Prisma schema synchronized successfully");
+    const prismaModule = await import("../utils/prisma.js");
+    prisma = prismaModule.prisma;
+
+    const redisModule = await import("../utils/redis.js")
+    redis = redisModule.redis
     const hashedPassword = bcrypt.hashSync("123456789", 10);
     await prisma.user.create({
       data: {
@@ -36,14 +65,20 @@ describe("user endpoints", () => {
         is_verified: true,
       },
     });
-  });
+
+    const appModule = await import("../app.js");
+    app = appModule.default;
+  }, 50000);
 
   afterAll(async () => {
     // Disconnect cleanly so Jest doesn't hang
-    if(postgresqlContainer) await postgresqlContainer.stop()
+    if (redis) await redis.quit()
     await prisma.user.deleteMany();
+    if (postgresqlContainer) await postgresqlContainer.stop();
+    if (redisContainer) await redisContainer.stop();
+    if (network) await network.stop();
     await prisma.$disconnect();
-  });
+  }, 5000);
 
   it("should return send OTP successfully", async () => {
     const user = {
@@ -82,7 +117,7 @@ describe("user endpoints", () => {
     expect(response.body.data).toHaveProperty("user");
 
     const Otpcode: string = String(await redis.get(redisKey));
-    console.log(Otpcode);
+    
     expect(Otpcode).toBe("null");
   });
 

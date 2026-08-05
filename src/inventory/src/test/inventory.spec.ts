@@ -68,6 +68,7 @@ describe("inventory test", () => {
       // Initializing shared Docker network
       network = await new Network().start();
 
+      // console.log("Current PATH:", process.env.PATH);
       kafkaContainer = await new KafkaContainer("confluentinc/cp-kafka:7.8.0")
         .withKraft()
         .withNetworkMode(network.getName())
@@ -79,6 +80,7 @@ describe("inventory test", () => {
       const kafkaPort = kafkaContainer.getMappedPort(9093);
       const kafkaHost = kafkaContainer.getHost();
       const kafkaName = kafkaContainer.getName();
+      console.log(kafkaContainer)
 
       // starting PostgreSql with Logical replication enabled
       postgresqlContainer = await new PostgreSqlContainer("postgres:18-alpine")
@@ -88,11 +90,13 @@ describe("inventory test", () => {
         .withUsername("postgres")
         .withPassword("password")
         .start();
+      
 
+      console.log(execSync("docker", { stdio: "inherit"}))
       const dynamicDbUrl = `postgresql://postgres:password@${postgresqlContainer.getHost()}:${postgresqlContainer.getMappedPort(5432)}/inventory`;
       process.env.INVENTORY_DATABASE_URL = dynamicDbUrl;
       console.log("pushing Prisma schema to test container...");
-      console.log(process.env.DATABASE_URL);
+      console.log(process.env.INVENTORY_DATABASE_URL);
       execSync("npx prisma db push", {
         env: {
           ...process.env,
@@ -102,7 +106,9 @@ describe("inventory test", () => {
       console.log("Prisma schema synchronized successfully");
 
       const broker = `${kafkaHost}:${kafkaPort}`;
+      console.log(broker)
       for (const topic of Topic_config) {
+        
         execSync(
           `docker exec ${kafkaName} /usr/bin/kafka-topics \
             --create \

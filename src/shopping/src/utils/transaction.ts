@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import "dotenv/config"
 import { prisma } from "./prisma.js";
 import { Decimal } from "@prisma/client/runtime/index-browser";
 import axios from "axios";
@@ -120,8 +121,8 @@ export const payment = async (
   };
 
   const publisher = new Redis({
-    host: "localhost",
-    port: 6379,
+    host: process.env["REDIS_HOST"] as string,
+    port: process.env["REDIS_PORT"] as unknown as number,
   });
   const channelName = `order_payment_url:${correlation_id}`;
 
@@ -164,6 +165,7 @@ export const payment = async (
           is_successful: "your last transaction was successful",
         }),
       );
+      await publisher.quit()
       await release_lock(key, token);
 
       await prisma.processed_events.create({
@@ -211,6 +213,7 @@ export const payment = async (
               is_ongoing: "Kindly complete the ongoing transaction",
             }),
           );
+          await publisher.quit()
           await release_lock(key, token);
           await prisma.processed_events.create({
             data: {
@@ -227,6 +230,7 @@ export const payment = async (
               is_successful: "your last transaction was successful",
             }),
           );
+          await publisher.quit()
           await release_lock(key, token);
           await prisma.processed_events.create({
             data: {
@@ -398,6 +402,7 @@ export const payment = async (
   });
 
   await publisher.publish(channelName, JSON.stringify({ paymentUrl }));
+  await publisher.quit()
 };
 
 export const paystackWebhook = async (body: ResponseI, signature: string) => {

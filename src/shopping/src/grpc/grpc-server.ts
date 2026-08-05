@@ -34,9 +34,10 @@ export const startGrpcServer = async () => {
       { transactions: TransactionI[]; nextCursor: string | null }
     >(observer.recentTransactions),
   });
+  const host = process.env.GRPC_HOST
   await new Promise<void>((resolve, reject) => {
     server.bindAsync(
-      "localhost:40099",
+      `${host}:40099`,
       grpc.ServerCredentials.createInsecure(),
       (err, port) => {
         if (err) {

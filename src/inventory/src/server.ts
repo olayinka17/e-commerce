@@ -41,9 +41,10 @@ export async function startServer(startJobs = true) {
     addMoreStock: grpcHandler(observer.addMoreStock),
   });
 
+  const host = process.env.GRPC_HOST
   await new Promise<void>((resolve, reject) => {
     server.bindAsync(
-      "localhost:40100",
+      `${host}:40100`,
       grpc.ServerCredentials.createInsecure(),
       (err) => {
         if (err) return reject(err);
