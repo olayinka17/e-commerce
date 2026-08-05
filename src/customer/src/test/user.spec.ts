@@ -27,6 +27,7 @@ describe("user endpoints", () => {
     process.env.REDIS_HOST = redisContainer.getHost();
     process.env.REDIS_PORT = redisContainer.getMappedPort(6379).toString();
 
+    // Starting PostgreSQL container
     postgresqlContainer = await new PostgreSqlContainer("postgres:18-alpine")
       .withNetwork(network)
       .withNetworkAliases("postgres-db")

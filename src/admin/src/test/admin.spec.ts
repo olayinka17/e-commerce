@@ -155,6 +155,7 @@ describe("admin service", () => {
 
     const appModule = await import("../app.js");
     app = appModule.default;
+    // Setting up gRPC servers
     shopping_server = new grpc.Server();
     shopping_server.addService(AdminPackage.Admin.service, {
       totalOrders: (

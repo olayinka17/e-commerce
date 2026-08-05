@@ -141,6 +141,7 @@ describe("shopping test", () => {
       process.env.REDIS_HOST = redisContainer.getHost();
       process.env.REDIS_PORT = redisContainer.getMappedPort(6379);
 
+      // Starting Kafka container
       kafkaContainer = await new KafkaContainer("confluentinc/cp-kafka:7.8.0")
         .withKraft()
         .withNetwork(network)

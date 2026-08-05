@@ -91,7 +91,7 @@ describe("inventory test", () => {
         .start();
       
 
-      console.log(execSync("docker", { stdio: "inherit"}))
+      
       const dynamicDbUrl = `postgresql://postgres:password@${postgresqlContainer.getHost()}:${postgresqlContainer.getMappedPort(5432)}/inventory`;
       process.env.INVENTORY_DATABASE_URL = dynamicDbUrl;
       console.log("pushing Prisma schema to test container...");

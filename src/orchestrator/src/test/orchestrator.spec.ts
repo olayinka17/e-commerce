@@ -52,6 +52,7 @@ describe("orchestrator", () => {
 
     const broker = `${kafkaHost}:${kafkaPort}`;
 
+    // Creating Kafka topics
     for (const topic of Topic_config) {
       execSync(
         `docker exec ${kafkaName} /usr/bin/kafka-topics \
