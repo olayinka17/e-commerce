@@ -1,6 +1,5 @@
 import path from "path";
 import request from "supertest";
-// import app from "../app.js";
 import * as grpc from "@grpc/grpc-js";
 import type { sendUnaryData, ServerUnaryCall } from "@grpc/grpc-js";
 import * as protoloader from "@grpc/proto-loader";

@@ -89,12 +89,13 @@ describe("product test", () => {
         .withPassword("password")
         .withCommand(["postgres", "-c", "wal_level=logical"])
         .start();
+
       const dbName = postgresqlContainer.getName().replace(/^\//, "");
 
       const dynamicDbUrl = `postgresql://postgres:password@${postgresqlContainer.getHost()}:${postgresqlContainer.getMappedPort(5432)}/products`;
       process.env.PRODUCT_DATABASE_URL = dynamicDbUrl;
       console.log("pushing Prisma schema to test container...");
-      console.log(process.env.PRODUCT_DATABASE_URL);
+      
       execSync("npx prisma migrate dev", {
         env: {
           ...process.env,

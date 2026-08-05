@@ -71,7 +71,6 @@ describe("user endpoints", () => {
   }, 50000);
 
   afterAll(async () => {
-    // Disconnect cleanly so Jest doesn't hang
     if (redis) await redis.quit()
     await prisma.user.deleteMany();
     if (postgresqlContainer) await postgresqlContainer.stop();

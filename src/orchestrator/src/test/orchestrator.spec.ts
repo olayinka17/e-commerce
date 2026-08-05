@@ -50,6 +50,7 @@ describe("orchestrator", () => {
     const kafkaName = kafkaContainer.getName();
 
     const broker = `${kafkaHost}:${kafkaPort}`;
+    
     for (const topic of Topic_config) {
       execSync(
         `docker exec ${kafkaName} /usr/bin/kafka-topics \

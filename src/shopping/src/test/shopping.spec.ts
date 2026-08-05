@@ -131,7 +131,6 @@ describe("shopping test", () => {
   let redisClient: any;
   let kafkaService: any;
   beforeAll(
-    
     async () => {
       // Initializing shared Docker network
       network = await new Network().start();
@@ -163,6 +162,7 @@ describe("shopping test", () => {
       const dbName = postgresqlContainer.getName().replace(/^\//, "");
       const dynamicUrl = `postgresql://postgres:password@${postgresqlContainer.getHost()}:${postgresqlContainer.getMappedPort(5432)}/shopping`;
       process.env.SHOPPING_DATABASE_URL = dynamicUrl;
+
       execSync("npx prisma migrate dev", {
         env: {
           ...process.env,
@@ -249,6 +249,7 @@ describe("shopping test", () => {
       });
 
       const broker = `${kafkaHost}:${kafkaPort}`;
+
       for (const topic of Topic_config) {
         execSync(
           `docker exec ${kafkaName} /usr/bin/kafka-topics \
@@ -261,6 +262,7 @@ describe("shopping test", () => {
           { stdio: "inherit" },
         );
       }
+
       kafkaClient = new Kafka({
         clientId: "shopping-test-service",
         brokers: [broker],
@@ -336,12 +338,12 @@ describe("shopping test", () => {
 
   afterAll(
     async () => {
-      await kafkaService.disconnect()
-      await kafkaService.disconnectConsumer()
+      await kafkaService.disconnect();
+      await kafkaService.disconnectConsumer();
       if (kafkaContainer) await kafkaContainer.stop();
       if (redisClient) await redisClient.quit();
-      if (ProductsServer)  ProductsServer.forceShutdown();
-      if (AdminClient) AdminClient.close()
+      if (ProductsServer) ProductsServer.forceShutdown();
+      if (AdminClient) AdminClient.close();
       if (postgresqlContainer) await postgresqlContainer.stop();
       if (debeziumContainer) await debeziumContainer.stop();
       if (redisContainer) await redisContainer.stop();
