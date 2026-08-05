@@ -4,11 +4,11 @@ on:
   workflow_call:
     inputs:
       service-name:
-        description: 'Service name to build'
+        description: Service name to build
         required: true
         type: string
       node-version:
-        description: 'Node.js version to use'
+        description: Node.js version to use
         required: false
         type: string
         default: '20'
@@ -36,6 +36,7 @@ jobs:
     defaults:
       run:
         shell: bash
+    
     steps:
       - name: Checkout code
         if: ${{ inputs.service-name != 'proxy' }}
@@ -51,10 +52,12 @@ jobs:
 
       - name: Install dependencies
         if: ${{ inputs.service-name != 'proxy' }}
+        shell: bash
         run: npm ci
 
       - name: Test each services
         if: ${{ inputs.service-name != 'proxy' }}
+        shell: bash
         run: npm run test --workspace=${{ inputs.service-name }}
       
       - name: Docker login
@@ -64,6 +67,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       
       - name: Build and push Docker image
+        shell: bash
         run: |
           IMAGE_TAG=${{ inputs.github-sha }}
           docker build -f ./src/${{ inputs.service-name }}/Dockerfile -t ${{ inputs.image-name }}:$IMAGE_TAG .
@@ -71,9 +75,11 @@ jobs:
           # echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Verify image can be pulled
+        shell: bash
         run: docker pull ${{ inputs.image-name }}:${{ inputs.github-sha }}
 
       - name: Update compose file with new image
+        shell: bash
         run: |
           sed -i  "s|image: ${{ inputs.service-name }}|image: ${{ inputs.image-name }}:${{ inputs.github-sha }}|g" docker-compose.yml
         

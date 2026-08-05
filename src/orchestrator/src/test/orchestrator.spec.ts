@@ -71,14 +71,6 @@ describe("orchestrator", () => {
     producer = kafkaClient.producer();
     await producer.connect();
 
-    // const consumer = kafkaClient.consumer({
-    //   groupId: `orchestrator-service-test:?${Date.now()}`,
-    // });
-    // await consumer.connect();
-    // await consumer.subscribe({
-    //   topic: Topics.ORDER_CREATED,
-    //   fromBeginning: true,
-    // });
     process.env.KAFKA_BROKERS = broker;
     bootstrap = await import("../bootstrap.js");
     await bootstrap.bootstrap()
@@ -89,7 +81,7 @@ describe("orchestrator", () => {
     await bootstrap
     if (kafkaContainer) await kafkaContainer.stop();
     if (bootstrap) await bootstrap.shutdown()
-    // bootstrap && (await bootstrap.shutdown());
+
   }, 80000);
 
   it("should process order created events", async () => {

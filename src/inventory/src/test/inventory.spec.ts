@@ -75,12 +75,11 @@ describe("inventory test", () => {
         .withNetworkAliases("kafka-broker")
         .start();
 
-      // const startedKafkaContainer = await kafkaContainer.start();
 
       const kafkaPort = kafkaContainer.getMappedPort(9093);
       const kafkaHost = kafkaContainer.getHost();
       const kafkaName = kafkaContainer.getName();
-      console.log(kafkaContainer)
+
 
       // starting PostgreSql with Logical replication enabled
       postgresqlContainer = await new PostgreSqlContainer("postgres:18-alpine")
@@ -106,7 +105,6 @@ describe("inventory test", () => {
       console.log("Prisma schema synchronized successfully");
 
       const broker = `${kafkaHost}:${kafkaPort}`;
-      console.log(broker)
       for (const topic of Topic_config) {
         
         execSync(

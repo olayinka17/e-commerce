@@ -4,7 +4,6 @@ import "dotenv/config.js"
 
 
 const sendErrorDev = (err: CustomError, req: Request, res: Response) => {
-    console.log(err)
     res.status(err.statusCode).json({
         status: err.status,
         message: err.message,

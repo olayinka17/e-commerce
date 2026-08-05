@@ -7,12 +7,11 @@ on:
 
 
 jobs:
-
   changes: 
+    runs-on: self-hosted
     defaults:
       run:
         shell: bash
-    runs-on: self-hosted
     outputs:
       services: ${{ steps.set-services.outputs.services }}
       # admin: ${{ steps.filter.outputs.admin }}
@@ -53,6 +52,7 @@ jobs:
             # kafka-package: 'packages/kafka-common'
         
       - id: set-services
+        shell: bash
         run: |
           services=()
 
@@ -85,9 +85,6 @@ jobs:
           fi
 
   build-and-test-services:
-    defaults:
-      run:
-        shell: bash
     needs: changes
     if: ${{ needs.changes.outputs.services != '[]' && needs.changes.outputs.services != '' }}
     uses: ./.github/workflows/build_ci.yml
@@ -103,11 +100,11 @@ jobs:
         service: ${{ fromJSON(needs.changes.outputs.services) }}
   
   deploy-to-docker-swarm:
+    needs: build-and-test-services
+    runs-on: self-hosted
     defaults:
       run:
         shell: bash
-    needs: build-and-test-services
-    runs-on: self-hosted
     steps: 
       - name: Initialize Docker Swarm if not already
         run: |
@@ -117,6 +114,7 @@ jobs:
           fi
 
       - name: Ensure Docker secrets exist
+        shell: bash
         run: |
           create_secret () {
           NAME=$1
