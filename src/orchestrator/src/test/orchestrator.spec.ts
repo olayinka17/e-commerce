@@ -40,6 +40,7 @@ describe("orchestrator", () => {
   let producer: Producer;
   let bootstrap: any;
   beforeAll(async () => {
+    // Starting Kafka container
     kafkaContainer = await new KafkaContainer("confluentinc/cp-kafka:7.8.0")
       .withKraft()
       .withNetworkAliases("kafka-broker")
@@ -50,7 +51,7 @@ describe("orchestrator", () => {
     const kafkaName = kafkaContainer.getName();
 
     const broker = `${kafkaHost}:${kafkaPort}`;
-    
+
     for (const topic of Topic_config) {
       execSync(
         `docker exec ${kafkaName} /usr/bin/kafka-topics \

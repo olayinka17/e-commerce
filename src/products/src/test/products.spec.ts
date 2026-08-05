@@ -70,6 +70,7 @@ describe("product test", () => {
         .withNetworkAliases("kafka-broker")
         .start();
 
+      // Starting Redis container
       redisContainer = await new RedisContainer("redis:7-alpine").start();
 
       process.env.REDIS_HOST = redisContainer.getHost();

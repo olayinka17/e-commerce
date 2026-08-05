@@ -135,6 +135,7 @@ describe("shopping test", () => {
       // Initializing shared Docker network
       network = await new Network().start();
 
+      // Starting Redis container
       redisContainer = await new RedisContainer("redis:7-alpine").start();
 
       process.env.REDIS_HOST = redisContainer.getHost();

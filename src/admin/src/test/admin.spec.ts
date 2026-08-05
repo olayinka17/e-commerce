@@ -148,6 +148,7 @@ describe("admin service", () => {
   let redisClient: any;
 
   beforeAll(async () => {
+    // Starting Redis container
     redisContainer = await new RedisContainer("redis:7-alpine").start();
     process.env.REDIS_HOST = redisContainer.getHost();
     process.env.REDIS_PORT = redisContainer.getMappedPort(6379);

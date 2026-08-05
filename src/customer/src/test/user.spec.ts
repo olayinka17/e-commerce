@@ -18,8 +18,10 @@ describe("user endpoints", () => {
   let app: any;
   let redis: any
   beforeAll(async () => {
+    // Initializing shared Docker network
     network = await new Network().start();
 
+    //  Starting Redis container
     redisContainer = await new RedisContainer("redis:7-alpine").start();
 
     process.env.REDIS_HOST = redisContainer.getHost();

@@ -67,7 +67,8 @@ describe("inventory test", () => {
     async () => {
       // Initializing shared Docker network
       network = await new Network().start();
-      
+
+      // Starting Kafka container
       kafkaContainer = await new KafkaContainer("confluentinc/cp-kafka:7.8.0")
         .withKraft()
         .withNetworkMode(network.getName())
