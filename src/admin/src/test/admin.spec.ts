@@ -155,6 +155,7 @@ describe("admin service", () => {
 
     const appModule = await import("../app.js");
     app = appModule.default;
+
     // Setting up gRPC servers
     shopping_server = new grpc.Server();
     shopping_server.addService(AdminPackage.Admin.service, {
@@ -291,6 +292,7 @@ describe("admin service", () => {
     const redisModule = await import("../utils/redis.js");
     redisClient = redisModule.redis
   }, 5000);
+  
   afterAll(async () => {
     if (redisClient) await redisClient.quit();
     if (redisContainer) await redisContainer.stop();

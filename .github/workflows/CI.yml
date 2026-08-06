@@ -9,9 +9,9 @@ on:
 jobs:
   changes: 
     runs-on: self-hosted
-    defaults:
-      run:
-        shell: bash
+    # defaults:
+    #   run:
+    #     shell: bash
     outputs:
       services: ${{ steps.set-services.outputs.services }}
       # admin: ${{ steps.filter.outputs.admin }}
@@ -54,7 +54,7 @@ jobs:
             # kafka-package: 'packages/kafka-common'
         
       - id: set-services
-        shell: bash
+        # shell: bash
         run: |
           services=()
 
@@ -104,9 +104,9 @@ jobs:
   deploy-to-docker-swarm:
     needs: build-and-test-services
     runs-on: self-hosted
-    defaults:
-      run:
-        shell: bash
+    # defaults:
+    #   run:
+    #     shell: bash
     steps: 
       - name: Initialize Docker Swarm if not already
         run: |
@@ -116,7 +116,7 @@ jobs:
           fi
 
       - name: Ensure Docker secrets exist
-        shell: bash
+        # shell: bash
         run: |
           create_secret () {
           NAME=$1

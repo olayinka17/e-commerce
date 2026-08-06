@@ -152,6 +152,7 @@ describe("shopping test", () => {
       const kafkaHost = kafkaContainer.getHost();
       const kafkaName = kafkaContainer.getName();
 
+      // Starting postgressql container
       postgresqlContainer = await new PostgreSqlContainer("postgres:18-alpine")
         .withNetwork(network)
         .withNetworkAliases("postgres-db")

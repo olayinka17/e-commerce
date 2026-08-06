@@ -38,9 +38,9 @@ describe("user endpoints", () => {
 
     const dynamicDbUrl = `postgresql://postgres:password@${postgresqlContainer.getHost()}:${postgresqlContainer.getMappedPort(5432)}/customer`;
     process.env.CUSTOMER_DATABASE_URL = dynamicDbUrl;
-    console.log(dynamicDbUrl);
+    // console.log(dynamicDbUrl);
     console.log("pushing Prisma schema to test container...");
-    console.log(process.env["CUSTOMER_DATABASE_URL"]);
+    // console.log(process.env["CUSTOMER_DATABASE_URL"]);
     try {
       execSync("npx prisma migrate dev", {
         env: {
@@ -58,6 +58,7 @@ describe("user endpoints", () => {
 
     const redisModule = await import("../utils/redis.js")
     redis = redisModule.redis
+    
     const hashedPassword = bcrypt.hashSync("123456789", 10);
     await prisma.user.create({
       data: {
