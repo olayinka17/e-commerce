@@ -11,7 +11,8 @@ import type {
   ProductRequest,
   ProductsRequest,
 } from "../utils/RpcFunctions.js";
-import type { CurrentProducts } from "../generated/prisma/client.js";
+import type { CurrentProducts, Products } from "../generated/prisma/client.js";
+import { getEmbedding } from "../utils/embedding.js";
 
 export interface ProductI {
   id?: string;
@@ -179,18 +180,26 @@ export class ProductService {
   async CreateProduct(
     call: ServerUnaryCall<ProductI, ProductsI>,
   ): Promise<ProductsI> {
+    const text = `${call.request.name} ${call.request.description} ${call.request.category_id}`;
+    const embeddings = await getEmbedding(text);
     const product = await this.prisma.$transaction(async (tx) => {
-      const product = await tx.products.create({
-        data: {
-          name: call.request.name,
-          description: call.request.description,
-          price: call.request.price as unknown as Decimal,
-          sku: call.request.sku,
-          category: {
-            connect: { id: call.request.category_id },
-          },
-        },
-      });
+      const product: Products = await tx.$queryRaw<Products>`
+      INSERT INTO products (name, description, price, sku, vector, category_id)
+      VALUES (${call.request.name}, ${call.request.description}, ${call.request.price as unknown as Decimal}, ${call.request.sku}, ${embeddings}::vector, ${call.request.category_id})
+      `;
+
+      // const product = await tx.products.create({
+      //   data: {
+      //     name: call.request.name,
+      //     description: call.request.description,
+      //     price: call.request.price as unknown as Decimal,
+      //     sku: call.request.sku,
+      //     vector: embeddings,
+      //     category: {
+      //       connect: { id: call.request.category_id },
+      //     },
+      //   },
+      // });
 
       await tx.inventoryOutbox.create({
         data: {
