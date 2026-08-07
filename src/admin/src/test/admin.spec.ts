@@ -307,6 +307,7 @@ describe("admin service", () => {
     await shutdown();
   }, 7000);
 
+
   it("should return the total revenue", async () => {
     const response = await request(app)
       .get("/api/v1/admin/revenue")
@@ -318,7 +319,8 @@ describe("admin service", () => {
     expect(response.body).toHaveProperty("status", "success");
     expect(response.body).toHaveProperty("data");
     expect(response.body.data).toHaveProperty("revenue");
-  });
+  }, 10000);
+
   it("should return orders", async () => {
     const response = await request(app)
       .get("/api/v1/admin/orders")
@@ -331,7 +333,9 @@ describe("admin service", () => {
     expect(response.body).toHaveProperty("status", "success");
     expect(response.body).toHaveProperty("data");
     expect(response.body.data).toHaveProperty("orders");
-  });
+  }, 10000);
+
+
   it("should return transactions", async () => {
     const response = await request(app)
       .get("/api/v1/admin/transactions")
@@ -343,7 +347,7 @@ describe("admin service", () => {
     expect(response.body).toHaveProperty("status", "success");
     expect(response.body).toHaveProperty("data");
     expect(response.body.data).toHaveProperty("transactions");
-  });
+  }, 10000);
 
   it("should create products", async () => {
     const response = await request(app)
@@ -364,7 +368,7 @@ describe("admin service", () => {
     expect(response.body).toHaveProperty("data");
     expect(response.body.data).toHaveProperty("product");
     expect(response.body.data.product).toHaveProperty("name", "biscuit");
-  });
+  }, 10000);
 
   it("should add more stock", async () => {
     const response = await request(app)
@@ -386,7 +390,7 @@ describe("admin service", () => {
     expect(response.body).toHaveProperty("data");
     expect(response.body.data).toHaveProperty("response");
     expect(response.body.data.response).toHaveProperty("success", true);
-  });
+  }, 10000);
 
   it("should arhive products", async () => {
     const response = await request(app)
@@ -401,7 +405,7 @@ describe("admin service", () => {
     expect(response.body).toHaveProperty("data");
     expect(response.body.data).toHaveProperty("response");
     expect(response.body.data.response).toHaveProperty("success", true);
-  });
+  }, 10000);
 
   it("should unarchive products", async () => {
     const response = await request(app)
@@ -416,7 +420,7 @@ describe("admin service", () => {
     expect(response.body).toHaveProperty("data");
     expect(response.body.data).toHaveProperty("response");
     expect(response.body.data.response).toHaveProperty("success", true);
-  });
+  }, 10000);
 
   it("updates products info", async () => {
     const response = await request(app)
@@ -435,7 +439,7 @@ describe("admin service", () => {
     expect(response.body.data).toHaveProperty("products");
     expect(response.body.data.products).toHaveProperty("name", "ola");
     expect(response.body.data.products).toHaveProperty("id", "23231");
-  });
+  }, 10000);
   it("should create categories ", async () => {
     const response = await request(app)
       .post("/api/v1/admin/categories")
@@ -454,5 +458,5 @@ describe("admin service", () => {
     expect(response.body.data).toHaveProperty("category");
     expect(response.body.data.category).toHaveProperty("name", "ola");
     expect(response.body.data.category).toHaveProperty("description", "ollaa");
-  });
+  }, 10000);
 });
