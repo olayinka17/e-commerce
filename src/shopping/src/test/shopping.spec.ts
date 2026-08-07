@@ -189,6 +189,7 @@ describe("shopping test", () => {
         },
       );
 
+      // starting sebezium container
       debeziumContainer = await new GenericContainer(
         "quay.io/debezium/connect:3.6",
       )

@@ -73,7 +73,7 @@ describe("user endpoints", () => {
     // importing express app after setting up Redis environment variables
     const appModule = await import("../app.js");
     app = appModule.default;
-  }, 50000);
+  }, 60000);
 
   afterAll(async () => {
     if (redis) await redis.quit()
@@ -82,7 +82,7 @@ describe("user endpoints", () => {
     if (redisContainer) await redisContainer.stop();
     if (network) await network.stop();
     await prisma.$disconnect();
-  }, 5000);
+  }, 10000);
 
   it("should return send OTP successfully", async () => {
     const user = {

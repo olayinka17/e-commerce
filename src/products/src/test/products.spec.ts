@@ -198,6 +198,7 @@ describe("product test", () => {
         logLevel: logLevel.NOTHING
       });
 
+      // prisma client
       const prismaModule = await import("../utils/prisma.js");
       prisma = prismaModule.prisma;
 
