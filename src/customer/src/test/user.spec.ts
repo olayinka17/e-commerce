@@ -40,7 +40,7 @@ describe("user endpoints", () => {
     process.env.CUSTOMER_DATABASE_URL = dynamicDbUrl;
 
     console.log("pushing Prisma schema to test container...");
-    console.log(process.env["CUSTOMER_DATABASE_URL"]);
+   // console.log(process.env["CUSTOMER_DATABASE_URL"]);
     try {
       execSync("npx prisma migrate dev", {
         env: {

@@ -190,7 +190,7 @@ describe("shopping test", () => {
       );
 
       debeziumContainer = await new GenericContainer(
-        "quay.io/debezium/connect@sha256:bd0ef1f8aa0690bc9bc0dec78c209f24f5d53ffd40fe5bc36c22db87052a51ad",
+        "quay.io/debezium/connect:3.6",
       )
         .withNetwork(network)
         .withExposedPorts(8083)
