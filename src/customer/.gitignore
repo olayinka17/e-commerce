@@ -3,6 +3,6 @@ node_modules
 .env
 .env.test
 
-/src/generated/prisma
+# /src/generated/prisma
 .dockerignore
 dist

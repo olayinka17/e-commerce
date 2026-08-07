@@ -58,7 +58,8 @@ jobs:
       - name: Test each services
         if: ${{ inputs.service-name != 'proxy' }}
         # shell: bash
-        run: npm run test --workspace=${{ inputs.service-name }}
+        run: 
+          npm run test --workspace=${{ inputs.service-name }}
       
       - name: Docker login
         uses: docker/login-action@v4
