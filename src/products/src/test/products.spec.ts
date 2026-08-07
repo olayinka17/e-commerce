@@ -201,6 +201,7 @@ describe("product test", () => {
       const prismaModule = await import("../utils/prisma.js");
       prisma = prismaModule.prisma;
 
+      // express app
       const appModule = await import("../app.js");
       app = appModule.default;
 

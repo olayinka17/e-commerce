@@ -8,7 +8,6 @@ export const protect = CatchAsync<{}, any, {}, {}>(
     if (!req.headers["x-user"]) {
       return next(new CustomError("Invalid request", 400));
     }
-
     const userInfo: string = req.headers["x-user"] as string;
     user = JSON.parse(userInfo);
     req.user = user;
