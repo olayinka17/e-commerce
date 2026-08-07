@@ -6,6 +6,7 @@ const PROTO_PATH = path.join(
   process.cwd(),
   "src/grpc/shopping.proto"
 )
+
 let client: any;
 
 export const startGrpcclient = async () => {

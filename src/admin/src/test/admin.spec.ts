@@ -153,6 +153,7 @@ describe("admin service", () => {
     process.env.REDIS_HOST = redisContainer.getHost();
     process.env.REDIS_PORT = redisContainer.getMappedPort(6379);
 
+    // importing express app after setting up Redis environment variables
     const appModule = await import("../app.js");
     app = appModule.default;
 

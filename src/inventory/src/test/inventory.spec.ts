@@ -106,6 +106,7 @@ describe("inventory test", () => {
 
       const broker = `${kafkaHost}:${kafkaPort}`;
       
+      // creating kafka topics
       for (const topic of Topic_config) {
         
         execSync(

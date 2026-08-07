@@ -81,9 +81,11 @@ jobs:
           fi
 
           if [ "${#services[@]}" -eq 0 ]; then
-            echo "services=[]" >> $GITHUB_OUTPUT
+            echo "services=[]" >> "$GITHUB_OUTPUT"
           else
-            echo "services=$(printf '%s\n' "${services[@]}" | jq -R . | jq -s .)" >> $GITHUB_OUTPUT
+            echo "services<<EOF" >> "$GITHUB_OUTPUT"
+            printf '%s\n' "${services[@]}" | jq -R . | jq -s -c . >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
           fi
 
   build-and-test-services:

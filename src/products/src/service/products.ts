@@ -160,7 +160,7 @@ export class ProductService {
   ): Promise<{ items: Partial<CurrentProducts>[] }> {
     const ids = call.request.ids.map((item: any) => item.id);
 
-    console.log(ids);
+    // console.log(ids);
     const products = await this.prisma.currentProducts.findMany({
       where: { id: { in: ids } },
       select: {

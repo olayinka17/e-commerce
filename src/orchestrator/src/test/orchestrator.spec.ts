@@ -66,6 +66,7 @@ describe("orchestrator", () => {
       );
     }
 
+    // initialising kafka client
     kafkaClient = new Kafka({
       clientId: "shopping-test-service",
       brokers: [broker],
