@@ -212,6 +212,8 @@ describe("shopping test", () => {
         .withStartupTimeout(180000)
         .withWaitStrategy(Wait.forLogMessage(/Kafka Connect started/))
         .start();
+
+        // creating kafka topics
       execSync(
         `docker exec ${kafkaName} /usr/bin/kafka-topics \
             --create \

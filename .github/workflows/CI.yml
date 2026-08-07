@@ -95,7 +95,7 @@ jobs:
     with:
       service-name: ${{ matrix.service }}
       node-version: '25'    
-      image-name: ecommerce:${{ matrix.service }}
+      image-name: ecommerce-${{ matrix.service }}
       stack-name: ecommerce
       github-sha: ${{ github.sha }}
     secrets: inherit
