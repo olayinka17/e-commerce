@@ -1,3 +1,4 @@
+import "dotenv/config"
 import path from "path";
 import request from "supertest";
 import * as grpc from "@grpc/grpc-js";

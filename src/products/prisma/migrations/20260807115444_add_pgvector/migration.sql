@@ -1,3 +1,3 @@
-CREATE EXTENSION IF NOT EXISTS vector;
-ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "embedding" vector(384);
-ALTER VIEW "CurrentProducts" ADD COLUMN IF NOT EXISTS "embedding" vector(384);
+-- CREATE EXTENSION IF NOT EXISTS vector;
+-- ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "embedding" vector(384);
+-- ALTER VIEW "CurrentProducts" ADD COLUMN IF NOT EXISTS "embedding" vector(384);

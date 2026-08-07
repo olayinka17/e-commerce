@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "rimraf dist/test && cross-env NODE_ENV=test && set NODE_OPTIONS=--experimental-vm-modules && jest --runInBand --detectOpenHandles",
+    "test": "rimraf dist/test &&  cross-env NODE_OPTIONS=--experimental-vm-modules jest --runInBand --detectOpenHandles",
     "build": "rimraf dist && npx tsc"
   },
   "keywords": [],

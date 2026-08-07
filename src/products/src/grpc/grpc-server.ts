@@ -1,4 +1,5 @@
 import path from "path";
+import "dotenv/config"
 import * as grpc from "@grpc/grpc-js";
 import * as protoloader from "@grpc/proto-loader";
 import { Observer } from "../utils/RpcFunctions.js";
