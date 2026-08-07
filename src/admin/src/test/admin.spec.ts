@@ -149,6 +149,7 @@ describe("admin service", () => {
   let redisClient: any;
 
   beforeAll(async () => {
+
     // Starting Redis container
     redisContainer = await new RedisContainer("redis:7-alpine").start();
     process.env.REDIS_HOST = redisContainer.getHost();
@@ -291,6 +292,8 @@ describe("admin service", () => {
     ]);
 
     await bootstrap();
+
+    // importing redisclient
     const redisModule = await import("../utils/redis.js");
     redisClient = redisModule.redis
   }, 5000);

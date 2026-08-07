@@ -38,7 +38,7 @@ describe("user endpoints", () => {
 
     const dynamicDbUrl = `postgresql://postgres:password@${postgresqlContainer.getHost()}:${postgresqlContainer.getMappedPort(5432)}/customer`;
     process.env.CUSTOMER_DATABASE_URL = dynamicDbUrl;
-    // console.log(dynamicDbUrl);
+
     console.log("pushing Prisma schema to test container...");
     // console.log(process.env["CUSTOMER_DATABASE_URL"]);
     try {

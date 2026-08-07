@@ -39,7 +39,7 @@ jobs:
     
     steps:
       - name: Checkout code
-        if: ${{ inputs.service-name != 'proxy' }}
+        # if: ${{ inputs.service-name != 'proxy' }}
         uses: actions/checkout@v4
       
       - name: Setup Node.js
@@ -68,12 +68,21 @@ jobs:
       
       - name: Build and push Docker image
         # shell: bash
+        if: ${{ inputs.service-name != 'proxy' }}
         run: |
           IMAGE_TAG=${{ inputs.github-sha }}
           docker build -f ./src/${{ inputs.service-name }}/Dockerfile -t ${{ inputs.image-name }}:$IMAGE_TAG .
           docker push ${{ inputs.image-name }}:$IMAGE_TAG
           # echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-
+       
+      - name: Build and push proxy Docker image
+        if: ${{ inputs.service-name == 'proxy' }}
+        run: |
+          IMAGE_TAG=${{ inputs.github-sha }}
+          docker build -f ./${{ inputs.service-name }}/Dockerfile -t ${{ inputs.image-name }}:$IMAGE_TAG .
+          docker push ${{ inputs.image-name }}:$IMAGE_TAG
+          # echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+        
       - name: Verify image can be pulled
         # shell: bash
         run: docker pull ${{ inputs.image-name }}:${{ inputs.github-sha }}

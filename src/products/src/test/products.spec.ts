@@ -207,6 +207,7 @@ describe("product test", () => {
       serverConfig = await import("../grpc/grpc-server.js");
 
       await serverConfig.startGrpcServer();
+      // redisclient
       const redisModule = await import("../utils/redis.js");
       redisClient = redisModule.redis;
 

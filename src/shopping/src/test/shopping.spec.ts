@@ -173,7 +173,7 @@ describe("shopping test", () => {
         },
         stdio: "inherit",
       });
-      console.log("Prisma schema synchronized successfully");
+      //console.log("Prisma schema synchronized successfully");
 
       const sql = fsReadFileSync(
         path.join(process.cwd(), "src", "test", "publication.sql"),
