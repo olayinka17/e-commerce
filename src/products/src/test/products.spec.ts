@@ -217,12 +217,12 @@ describe("product test", () => {
       redisClient = redisModule.redis;
 
       ProductClient = new productsPackage.Products(
-        "localhost:40098",
+        "127.0.0.1:40098",
         grpc.credentials.createInsecure(),
       );
 
       AdminClient = new productsPackage.AdminProduct(
-        "localhost:40098",
+        "127.0.0.1:40098",
         grpc.credentials.createInsecure(),
       );
     },
