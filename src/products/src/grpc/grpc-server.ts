@@ -53,7 +53,7 @@ export const startGrpcServer = async () => {
       observer.createCategories,
     ),
   });
-  const host = process.env.GRPC_HOST
+  const host = process.env.NODE_ENV === 'test' ? "localhost" : process.env.GRPC_HOST
   await new Promise<void>((resolve, reject) => {
     server.bindAsync(
       `${host}:40098`,

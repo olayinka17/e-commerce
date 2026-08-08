@@ -30,6 +30,11 @@ on:
       #   SWARM_MANAGER_IP:
       #     required: true
 
+permissions:
+  contents: read
+  packages: write
+
+  
 jobs:
   build:
     runs-on: self-hosted

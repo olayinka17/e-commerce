@@ -41,7 +41,7 @@ export async function startServer(startJobs = true) {
     addMoreStock: grpcHandler(observer.addMoreStock),
   });
 
-  const host = process.env.GRPC_HOST
+  const host = process.env.NODE_ENV === 'test' ? "localhost" : process.env.GRPC_HOST
   await new Promise<void>((resolve, reject) => {
     server.bindAsync(
       `${host}:40100`,

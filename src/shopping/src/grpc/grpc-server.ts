@@ -34,7 +34,7 @@ export const startGrpcServer = async () => {
       { transactions: TransactionI[]; nextCursor: string | null }
     >(observer.recentTransactions),
   });
-  const host = process.env.GRPC_HOST
+  const host = process.env.NODE_ENV === 'test' ? "localhost" : process.env.GRPC_HOST
   await new Promise<void>((resolve, reject) => {
     server.bindAsync(
       `${host}:40099`,
