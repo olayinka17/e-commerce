@@ -11,7 +11,7 @@ on:
         description: Node.js version to use
         required: false
         type: string
-        default: '24'
+        default: '22.14.0'
       image-name: 
         required: true
         type: string
@@ -34,7 +34,7 @@ permissions:
   contents: read
   packages: write
 
-  
+
 jobs:
   build:
     runs-on: self-hosted
