@@ -13,17 +13,17 @@ export async function bootstrap() {
 
   await kafkaService.connect();
   await subscribeEvent(kafkaService).catch(async(error) => {
-    await kafkaService.disconnect();
     await kafkaService.disconnectConsumer();
+    await kafkaService.disconnect();
     console.error("Error subscribing to events:", error);
   });
 }
 
 export async function shutdown() {
-  await kafkaService.disconnect();
   await kafkaService.disconnectConsumer();
+  await kafkaService.disconnect();
   console.log("Kafka service disconnected. Shutting down...");
- // process.exit(0);
+ //process.exit(1);
 }
 // await subscribeEvent(kafkaService).catch((error) => {
 //   kafkaService.disconnect();
