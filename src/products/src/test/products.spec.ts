@@ -297,7 +297,7 @@ describe("product test", () => {
     const receivedKafkaKey: string[] = [];
     const receivedKafkaHeaders: string[] = [];
 
-    await consumer.run({
+    consumer.run({
       eachMessage: async ({ message }) => {
         receivedKafkaMessages.push(JSON.parse(message.value!.toString()));
         receivedKafkaKey.push(message.key?.toString() as string);
@@ -349,7 +349,7 @@ describe("product test", () => {
     const receivedKafkaKey: string[] = [];
     const receivedKafkaHeaders: string[] = [];
 
-    await consumer.run({
+    consumer.run({
       eachMessage: async ({ message }) => {
         receivedKafkaMessages.push(JSON.parse(message.value!.toString()));
         receivedKafkaKey.push(message.key?.toString() as string);
@@ -421,7 +421,7 @@ describe("product test", () => {
     const receivedKafkaKey: string[] = [];
     const receivedKafkaHeaders: string[] = [];
 
-    await consumer.run({
+    consumer.run({
       eachMessage: async ({ message }) => {
         receivedKafkaMessages.push(JSON.parse(message.value!.toString()));
         receivedKafkaKey.push(message.key?.toString() as string);

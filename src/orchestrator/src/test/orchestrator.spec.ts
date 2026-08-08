@@ -116,7 +116,7 @@ describe("orchestrator", () => {
     const receivedKafkaMessages: Record<string, string>[] = [];
     const receivedKafkaHeaders: string[] = [];
 
-    await consumer.run({
+    consumer.run({
       eachMessage: async ({ message }) => {
         receivedKafkaMessages.push(JSON.parse(message.value!.toString()));
         receivedKafkaHeaders.push(
@@ -163,7 +163,7 @@ describe("orchestrator", () => {
     const receivedKafkaMessages: Record<string, string>[] = [];
     const receivedKafkaHeaders: string[] = [];
 
-    await consumer.run({
+    consumer.run({
       eachMessage: async ({ message }) => {
         receivedKafkaMessages.push(JSON.parse(message.value!.toString()));
         receivedKafkaHeaders.push(
@@ -209,7 +209,7 @@ describe("orchestrator", () => {
     const receivedKafkaMessages: Record<string, string>[] = [];
     const receivedKafkaHeaders: string[] = [];
 
-    await consumer.run({
+    consumer.run({
       eachMessage: async ({ message }) => {
         // console.log(message.value!.toString())
         receivedKafkaMessages.push(JSON.parse(message.value!.toString()));
@@ -255,7 +255,7 @@ describe("orchestrator", () => {
     const receivedKafkaMessages: Record<string, string>[] = [];
     const receivedKafkaHeaders: string[] = [];
 
-    await consumer.run({
+    consumer.run({
       eachMessage: async ({ message }) => {
         receivedKafkaMessages.push(JSON.parse(message.value!.toString()));
         receivedKafkaHeaders.push(
@@ -301,7 +301,7 @@ describe("orchestrator", () => {
     const receivedKafkaMessages: Record<string, string>[] = [];
     const receivedKafkaHeaders: string[] = [];
 
-    await consumer.run({
+    consumer.run({
       eachMessage: async ({ message }) => {
         receivedKafkaMessages.push(JSON.parse(message.value!.toString()));
         receivedKafkaHeaders.push(
@@ -348,7 +348,7 @@ describe("orchestrator", () => {
     const receivedKafkaMessages: Record<string, string>[] = [];
     const receivedKafkaHeaders: string[] = [];
 
-    await consumer.run({
+    consumer.run({
       eachMessage: async ({ message }) => {
         // console.log(message.value!.toString())
         receivedKafkaMessages.push(JSON.parse(message.value!.toString()));
@@ -395,7 +395,7 @@ describe("orchestrator", () => {
     const receivedKafkaMessages: Record<string, string>[] = [];
     const receivedKafkaHeaders: string[] = [];
 
-    await consumer.run({
+    consumer.run({
       eachMessage: async ({ message }) => {
         receivedKafkaMessages.push(JSON.parse(message.value!.toString()));
         receivedKafkaHeaders.push(

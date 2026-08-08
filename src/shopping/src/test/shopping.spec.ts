@@ -415,7 +415,7 @@ describe("shopping test", () => {
 
     const receivedKafkaHeaders: string[] = [];
 
-    await consumer.run({
+    consumer.run({
       eachMessage: async ({ message }) => {
         receivedKafkaMessages.push(JSON.parse(message.value!.toString()));
         receivedKafkaHeaders.push(
@@ -495,7 +495,7 @@ describe("shopping test", () => {
     const receivedKafkaMessages: Record<string, string | OrderI>[] = [];
     const receivedKafkaHeaders: string[] = [];
 
-    await consumer.run({
+    consumer.run({
       eachMessage: async ({ message }) => {
         receivedKafkaMessages.push(JSON.parse(message.value!.toString()));
         receivedKafkaHeaders.push(
