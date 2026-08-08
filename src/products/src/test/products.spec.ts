@@ -122,7 +122,7 @@ describe("product test", () => {
 
       //  Starting Debezium container for CDC
       debeziumContainer = await new GenericContainer(
-        "quay.io/debezium/connect:3,6",
+        "quay.io/debezium/connect:3.6",
       )
         .withNetwork(network)
         .withExposedPorts(8083)

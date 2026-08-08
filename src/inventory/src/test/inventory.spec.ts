@@ -127,7 +127,7 @@ describe("inventory test", () => {
         logLevel: logLevel.NOTHING,
       });
 
-      // kafka producer
+      //// kafka producer
       producer = kafkaClient.producer();
       await producer.connect();
       process.env.KAFKA_BROKERS = broker;
