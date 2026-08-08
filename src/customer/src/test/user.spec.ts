@@ -70,7 +70,7 @@ describe("user endpoints", () => {
       },
     });
 
-    // importing express app after setting up Redis environment variables
+    //// importing express app after setting up Redis environment variables
     const appModule = await import("../app.js");
     app = appModule.default;
   }, 60000);

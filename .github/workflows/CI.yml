@@ -93,6 +93,9 @@ jobs:
   build-and-test-services:
     needs: changes
     if: ${{ needs.changes.outputs.services != '[]' && needs.changes.outputs.services != '' }}
+    permissions:
+      contents: read
+      packages: write
     uses: ./.github/workflows/build_ci.yml
     with:
       service-name: ${{ matrix.service }}
