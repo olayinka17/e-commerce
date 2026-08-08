@@ -91,7 +91,7 @@ jobs:
           context: .
           file: ./src/${{ inputs.service-name }}/Dockerfile
           # platforms: linux/amd64
-          push: true
+          # push: true
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/${{ inputs.image-name }}:${{ inputs.github-sha }}
             ${{ secrets.DOCKER_USERNAME }}/${{ inputs.image-name }}:latest
