@@ -87,6 +87,7 @@ describe("orchestrator", () => {
   }, 120000);
 
   afterAll(async () => {
+    if (producer) await producer.disconnect();
     await bootstrap
     if (kafkaContainer) await kafkaContainer.stop();
     if (bootstrap) await bootstrap.shutdown()

@@ -180,6 +180,7 @@ describe("shopping test", () => {
         "utf8",
       );
 
+      // creating publication
       execFileSync(
         "docker",
         ["exec", "-i", dbName, "psql", "-U", "postgres", "-d", "shopping"],

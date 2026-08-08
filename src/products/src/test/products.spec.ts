@@ -192,6 +192,7 @@ describe("product test", () => {
       }
       const broker = `${kafkaHost}:${kafkaPort}`;
 
+      // kafkaclient
       kafkaClient = new Kafka({
         clientId: "shopping-test-service",
         brokers: [broker],
