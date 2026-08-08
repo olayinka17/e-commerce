@@ -63,7 +63,7 @@ jobs:
       - name: Test each services
         if: ${{ inputs.service-name != 'proxy' }}
         # shell: bash
-        run: 
+        run: |
           npm run test --workspace=${{ inputs.service-name }}
           echo "===== JEST COMMAND FINISHED ====="
       
