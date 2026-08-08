@@ -192,6 +192,7 @@ describe("product test", () => {
       }
       const broker = `${kafkaHost}:${kafkaPort}`;
 
+      console.log("im here")
       // kafkaclient
       kafkaClient = new Kafka({
         clientId: "shopping-test-service",
@@ -207,6 +208,7 @@ describe("product test", () => {
       const appModule = await import("../app.js");
       app = appModule.default;
 
+      console.log("im cool")
       serverConfig = await import("../grpc/grpc-server.js");
 
       await serverConfig.startGrpcServer();
