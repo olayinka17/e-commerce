@@ -80,6 +80,7 @@ jobs:
           IMAGE_TAG=${{ inputs.github-sha }}
           
           docker build -f ./src/${{ inputs.service-name }}/Dockerfile -t ${{ inputs.image-name }}:$IMAGE_TAG .
+          docker tag ${{ inputs.image-name }} ${{ secrets.DOCKER_USERNAME }}/${{ inputs.image-name }}:$IMAGE_TAG
           docker push ${{ secrets.DOCKER_USERNAME }}/${{ inputs.image-name }}:$IMAGE_TAG
           # echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
        
