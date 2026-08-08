@@ -83,14 +83,14 @@ describe("orchestrator", () => {
     bootstrap = await import("../bootstrap.js");
     await bootstrap.bootstrap()
     
-    await new Promise((resolve) => setTimeout(resolve, 50000));
+    await new Promise((resolve) => setTimeout(resolve, 30000));
   }, 120000);
 
   afterAll(async () => {
+    if (bootstrap) await bootstrap.shutdown()
     if (producer) await producer.disconnect();
     //await bootstrap
     if (kafkaContainer) await kafkaContainer.stop();
-    if (bootstrap) await bootstrap.shutdown()
 
   }, 80000);
 

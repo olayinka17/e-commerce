@@ -1,15 +1,13 @@
-import { config } from "dotenv";
 import { Kafka, logLevel } from "kafkajs";
 export class KafkaService {
     kafka;
     producer;
     consumer;
     constructor(kafkaconfig) {
-        console.log(kafkaconfig.brokers);
         this.kafka = new Kafka({
             clientId: kafkaconfig.clientId,
             brokers: kafkaconfig.brokers,
-            logLevel: logLevel.NOTHING
+            logLevel: logLevel.NOTHING,
         });
         this.producer = this.kafka.producer();
         this.consumer = null;
@@ -21,20 +19,18 @@ export class KafkaService {
         await this.producer.disconnect();
     }
     async publish(topic, messages) {
-        //console.log(JSON.stringify(messages, null, 2));
-        const formattedMessages = messages.map(msg => ({
+        const formattedMessages = messages.map((msg) => ({
             ...msg,
             value: JSON.stringify(msg.value),
-            headers: msg.headers
+            headers: msg.headers,
         }));
-        //console.log(formattedMessages)
         await this.producer.send({
             topic,
-            messages: formattedMessages
+            messages: formattedMessages,
         });
     }
     createConsumer(groupId) {
-        return this.consumer = this.kafka.consumer({ groupId });
+        return (this.consumer = this.kafka.consumer({ groupId }));
     }
     async disconnectConsumer() {
         await this.consumer.stop();
