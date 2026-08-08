@@ -14,7 +14,7 @@ export const startInventoryGrpcClient = async () => {
   const grpcObject = grpc.loadPackageDefinition(packageDef) as any;
 
   const inventoryPackage = grpcObject.inventoryPackage;
-  const host = process.env.INVENTORY_CLIENT;
+  const host = process.env.NODE_ENV === 'test' ? 'localhost' : process.env.SHOPPING_CLIENT 
   client = new inventoryPackage.Inventory(
     `${host}:40100`,
     grpc.credentials.createInsecure(),

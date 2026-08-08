@@ -15,7 +15,7 @@ export const startPrductsGrpcClient = async () => {
     const grpcObject = grpc.loadPackageDefinition(packageDef) as any;
 
     const adminProductPackage = grpcObject.productsPackage
-    const host = process.env.PRODUCT_CLIENT
+    const host = process.env.NODE_ENV === 'test' ? 'localhost' : process.env.SHOPPING_CLIENT 
     client = new adminProductPackage.AdminProduct(
         `${host}:40098`,
         grpc.credentials.createInsecure()

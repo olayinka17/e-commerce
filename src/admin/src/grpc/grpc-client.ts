@@ -16,7 +16,7 @@ export const startGrpcclient = async () => {
 
   const adminPackage = grpcObject.AdminPackage;
 
-  const host = process.env.SHOPPING_CLIENT
+  const host = process.env.NODE_ENV === 'test' ? 'localhost' : process.env.SHOPPING_CLIENT 
 
   client = new adminPackage.Admin(
     `${host}:40099`,
