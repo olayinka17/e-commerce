@@ -208,7 +208,7 @@ describe("product test", () => {
       const appModule = await import("../app.js");
       app = appModule.default;
 
-      console.log("im cool")
+      //console.log("im cool")
       serverConfig = await import("../grpc/grpc-server.js");
 
       await serverConfig.startGrpcServer();
