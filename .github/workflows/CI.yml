@@ -101,7 +101,7 @@ jobs:
     uses: ./.github/workflows/build_ci.yml
     with:
       service-name: ${{ matrix.service }}
-      node-version: '22.14.0'    
+      node-version: '24'    
       image-name: ecommerce-${{ matrix.service }}
       stack-name: ecommerce
       github-sha: ${{ github.sha }}
