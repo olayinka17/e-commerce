@@ -20,8 +20,19 @@ export async function bootstrap() {
 }
 
 export async function shutdown() {
-  await kafkaService.disconnectConsumer();
-  await kafkaService.disconnect();
+  if (!kafkaService) return;
+    try {
+    await kafkaService.disconnectConsumer();
+  } catch (error) {
+    console.warn("Failed to stop Kafka consumer:", error);
+  }
+  try {
+    await kafkaService.disconnect();
+  } catch (error) {
+    console.warn("Failed to disconnect Kafka producer:", error);
+  }
+  // await kafkaService.disconnectConsumer();
+  // await kafkaService.disconnect();
   console.log("Kafka service disconnected. Shutting down...");
  //process.exit(1);
 }
