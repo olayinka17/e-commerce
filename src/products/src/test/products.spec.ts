@@ -209,6 +209,7 @@ describe("product test", () => {
       app = appModule.default;
 
 
+      // importing grpc server
       serverConfig = await import("../grpc/grpc-server.js");
 
       await serverConfig.startGrpcServer();
@@ -225,6 +226,8 @@ describe("product test", () => {
         "127.0.0.1:40098",
         grpc.credentials.createInsecure(),
       );
+
+
     },
     50 * 60 * 1000,
   );

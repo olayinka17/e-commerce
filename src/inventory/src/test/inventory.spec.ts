@@ -4,7 +4,6 @@ import { Network } from "testcontainers";
 import type { ServiceError } from "@grpc/grpc-js";
 import { KafkaContainer } from "@testcontainers/kafka";
 import { PostgreSqlContainer } from "@testcontainers/postgresql";
-
 import { Kafka, logLevel, type Consumer, type Producer } from "kafkajs";
 import { Topics } from "@enterprise/kafka-common";
 import { v4 as uuidv4 } from "uuid";
@@ -127,11 +126,13 @@ describe("inventory test", () => {
         logLevel: logLevel.NOTHING,
       });
 
-      //// kafka producer
+      // kafka producer
       producer = kafkaClient.producer();
       await producer.connect();
+
       process.env.KAFKA_BROKERS = broker;
 
+      // importing prisma
       const prismaModule = await import("../util/prisma.js");
       prisma = prismaModule.prisma;
 

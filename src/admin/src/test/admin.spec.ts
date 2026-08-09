@@ -293,9 +293,11 @@ describe("admin service", () => {
 
     await bootstrap();
 
-    
+    // importing redisclient
     const redisModule = await import("../utils/redis.js");
     redisClient = redisModule.redis
+
+
   }, 10000);
   
   afterAll(async () => {

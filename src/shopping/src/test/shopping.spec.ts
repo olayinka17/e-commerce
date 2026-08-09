@@ -340,6 +340,7 @@ describe("shopping test", () => {
       });
       await bindServer(ProductsServer, "127.0.0.1:40098");
       await bootstrap();
+      // importing redis client
       const redisModule = await import("../utils/redis.js");
       redisClient = redisModule.redis;
     },

@@ -1,8 +1,6 @@
 import { execSync } from "node:child_process";
 import "dotenv/config";
 import request from "supertest";
-// import app from "../app.js";
-// import { redis } from "../utils/redis.js";
 import bcrypt from "bcryptjs";
 import { PostgreSqlContainer } from "@testcontainers/postgresql";
 import { RedisContainer } from "@testcontainers/redis";
@@ -73,7 +71,7 @@ describe("user endpoints", () => {
     // importing express app after setting up Redis environment variables
     const appModule = await import("../app.js");
     app = appModule.default;
-    
+
   }, 60000);
 
   afterAll(async () => {

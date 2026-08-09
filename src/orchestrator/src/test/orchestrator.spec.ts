@@ -73,6 +73,7 @@ describe("orchestrator", () => {
       logLevel: logLevel.NOTHING,
     });
 
+    // kafka producer
     producer = kafkaClient.producer();
     await producer.connect();
 
