@@ -15,7 +15,7 @@ function getSecret(secretName: string) {
   }
 }
 
-const resend_api_key = getSecret("RESEND_API_KEY") as string
+const resend_api_key = process.env.NODE_ENV === "test" ? "empty" : getSecret("RESEND_API_KEY") as string
 
 const resend = new Resend(resend_api_key);
 
