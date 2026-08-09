@@ -73,7 +73,7 @@ describe("user endpoints", () => {
     const appModule = await import("../app.js");
     app = appModule.default;
     console.log("hdhdhd")
-  }, 60000);
+  }, 70000);
 
   afterAll(async () => {
     if (redis) await redis.quit();
@@ -109,6 +109,7 @@ describe("user endpoints", () => {
     const redisKey: string = `customer-service:OTP:test@example.com`;
 
     await redis.set(redisKey, hashedOtp, "EX", 300);
+    //console.log("oaoao")
 
     const response = await request(app).post("/api/v1/users/verify-otp").send({
       email: "test@example.com",

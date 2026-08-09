@@ -20,7 +20,7 @@ const jwt_secret = getSecret("JWT_SECRET") as string
 
 const signToken = (id: string) => {
   return jwt.sign({ id }, jwt_secret || "jwt_secret", {
-    expiresIn: process.env.JWT_EXPIRES_IN as unknown as number,
+    expiresIn: process.env.JWT_EXPIRES_IN as unknown as number || "3h" as unknown as number,
   });
 };
 
