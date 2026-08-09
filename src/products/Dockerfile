@@ -20,17 +20,24 @@ WORKDIR /app
 
 RUN apk add --no-cache openssl
 
-COPY package.json package-lock.json ./
-COPY packages/kafka-common/package.json ./packages/kafka-common/package.json
-COPY src/products/package.json ./src/products/package.json
+# COPY package.json package-lock.json ./
+# COPY packages/kafka-common/package.json ./packages/kafka-common/package.json
+# COPY src/products/package.json ./src/products/package.json
 
-RUN npm ci --omit=dev
+# RUN npm ci --omit=dev
 
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/package-lock.json ./package-lock.json
+COPY --from=builder /app/node_modules ./node_modules
+
+COPY --from=builder /app/packages/kafka-common/package.json ./packages/kafka-common/package.json
 COPY --from=builder /app/packages/kafka-common/dist ./packages/kafka-common/dist
+
+# COPY --from=builder /app/src/products/package.json ./
 COPY --from=builder /app/src/products/dist ./dist
 COPY --from=builder /app/src/products/prisma ./prisma
 
-COPY --from=builder /app/src/products/src/grpc/products.proto ./src/products.proto
+COPY --from=builder /app/src/products/src/grpc/products.proto ./src/grpc/products.proto
 
 EXPOSE 4094
 CMD ["node", "dist/server.js"]
