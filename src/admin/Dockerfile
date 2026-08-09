@@ -17,13 +17,19 @@ RUN npm run build --workspace=admin
 FROM node:22-alpine AS runtime
 WORKDIR /app
 
-COPY package.json package-lock.json ./
-COPY packages/kafka-common/package.json ./packages/kafka-common/package.json
-COPY src/admin/package.json ./src/admin/package.json
+# COPY package.json package-lock.json ./
+# COPY packages/kafka-common/package.json ./packages/kafka-common/package.json
+# COPY src/admin/package.json ./src/admin/package.json
 
-RUN npm ci --omit=dev
+# RUN npm ci --omit=dev
 
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/package-lock.json ./package-lock.json
+COPY --from=builder /app/node_modules ./node_modules
+
+COPY --from=builder /app/packages/kafka-common/package.json ./packages/kafka-common/package.json
 COPY --from=builder /app/packages/kafka-common/dist ./packages/kafka-common/dist
+
 COPY --from=builder /app/src/admin/dist ./dist
 
 COPY --from=builder /app/src/admin/src/grpc/inventory.proto ./src/grpc/inventory.proto

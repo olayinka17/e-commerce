@@ -10,7 +10,7 @@ await kafkaService.connect();
 await bootstrap();
 await startGrpcServer();
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 4095;
 
 const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

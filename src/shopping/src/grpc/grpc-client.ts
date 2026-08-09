@@ -11,7 +11,7 @@ export const startGrpcclient = async () => {
 
   const productsPackage = grpcObject.productsPackage;
 
-  const host = process.env.NODE_ENV === 'test' ? "localhost" : process.env.PRODUCT_CLIENT
+  const host = process.env.NODE_ENV === 'test' ? "127.0.0.1" : process.env.PRODUCT_CLIENT
   client = new productsPackage.Products(
     `${host}:40098`,
     grpc.credentials.createInsecure(),

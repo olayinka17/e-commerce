@@ -195,7 +195,7 @@ describe("inventory test", () => {
     });
 
     const client = new inventoryPackage.Inventory(
-      "localhost:40100",
+      "127.0.0.1:40100",
       grpc.credentials.createInsecure(),
     );
 

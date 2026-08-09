@@ -137,7 +137,7 @@ jobs:
           }
 
           create_secret RESEND_API_KEY "${{ secrets.RESEND_API_KEY }}"
-          create_secret JWT_KEY "${{ secrets.JWT_KEY }}"
+          create_secret JWT_KEY "${{ secrets.JWT_SECRET }}"
           create_secret CUSTOMER_DATABASE_URL "${{ secrets.CUSTOMER_DATABASE_URL }}"
           create_secret INVENTORY_DATABASE_URL "${{ secrets.INVENTORY_DATABASE_URL }}"
           create_secret PRODUCT_DATABASE_URL "${{ secrets.PRODUCT_DATABASE_URL }}"

@@ -286,9 +286,9 @@ describe("admin service", () => {
     });
 
     await Promise.all([
-      bindServer(shopping_server, "localhost:40099"),
-      bindServer(inventoryServer, "localhost:40100"),
-      bindServer(ProductsServer, "localhost:40098"),
+      bindServer(shopping_server, "127.0.0.1:40099"),
+      bindServer(inventoryServer, "127.0.0.1:40100"),
+      bindServer(ProductsServer, "127.0.0.1:40098"),
     ]);
 
     await bootstrap();

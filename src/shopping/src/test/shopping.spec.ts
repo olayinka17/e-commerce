@@ -276,8 +276,10 @@ describe("shopping test", () => {
         brokers: [broker],
         logLevel: logLevel.NOTHING,
       });
+
       producer = kafkaClient.producer();
       await producer.connect();
+
       process.env.KAFKA_BROKERS = broker;
 
       const prismaModule = await import("../utils/prisma.js");
@@ -296,7 +298,7 @@ describe("shopping test", () => {
       await serverConfig.startGrpcServer();
 
       AdminClient = new AdminPackage.Admin(
-        "localhost:40099",
+        "127.0.0.1:40099",
         grpc.credentials.createInsecure(),
       );
 
@@ -336,7 +338,7 @@ describe("shopping test", () => {
           });
         },
       });
-      await bindServer(ProductsServer, "localhost:40098");
+      await bindServer(ProductsServer, "127.0.0.1:40098");
       await bootstrap();
       const redisModule = await import("../utils/redis.js");
       redisClient = redisModule.redis;
