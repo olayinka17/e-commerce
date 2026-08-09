@@ -294,6 +294,7 @@ describe("shopping test", () => {
       const appModule = await import("../app.js");
       app = appModule.default;
 
+      // importing gRPC server
       serverConfig = await import("../grpc/grpc-server.js");
       await serverConfig.startGrpcServer();
 

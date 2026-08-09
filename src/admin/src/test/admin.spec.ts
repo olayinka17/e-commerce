@@ -1,4 +1,4 @@
-import "dotenv/config"
+import "dotenv/config";
 import path from "path";
 import request from "supertest";
 import * as grpc from "@grpc/grpc-js";
@@ -149,7 +149,6 @@ describe("admin service", () => {
   let redisClient: any;
 
   beforeAll(async () => {
-
     // Starting Redis container
     redisContainer = await new RedisContainer("redis:7-alpine").start();
     process.env.REDIS_HOST = redisContainer.getHost();
@@ -295,11 +294,9 @@ describe("admin service", () => {
 
     // importing redisclient
     const redisModule = await import("../utils/redis.js");
-    redisClient = redisModule.redis
-
-
+    redisClient = redisModule.redis;
   }, 10000);
-  
+
   afterAll(async () => {
     if (redisClient) await redisClient.quit();
     if (redisContainer) await redisContainer.stop();
@@ -308,7 +305,6 @@ describe("admin service", () => {
     if (inventoryServer) inventoryServer.forceShutdown();
     await shutdown();
   }, 7000);
-
 
   it("should return the total revenue", async () => {
     const response = await request(app)
@@ -336,7 +332,6 @@ describe("admin service", () => {
     expect(response.body).toHaveProperty("data");
     expect(response.body.data).toHaveProperty("orders");
   });
-
 
   it("should return transactions", async () => {
     const response = await request(app)

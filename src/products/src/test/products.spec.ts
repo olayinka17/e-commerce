@@ -64,7 +64,7 @@ describe("product test", () => {
       // Initializing shared Docker network
       network = await new Network().start();
 
-      // Starting Kafka container 
+      // Starting Kafka container
       kafkaContainer = await new KafkaContainer("confluentinc/cp-kafka:7.8.0")
         .withKraft()
         .withNetworkMode(network.getName())
@@ -76,7 +76,6 @@ describe("product test", () => {
 
       process.env.REDIS_HOST = redisContainer.getHost();
       process.env.REDIS_PORT = redisContainer.getMappedPort(6379).toString();
-
 
       const kafkaPort = kafkaContainer.getMappedPort(9093);
       const kafkaHost = kafkaContainer.getHost();
@@ -97,7 +96,7 @@ describe("product test", () => {
       const dynamicDbUrl = `postgresql://postgres:password@${postgresqlContainer.getHost()}:${postgresqlContainer.getMappedPort(5432)}/products`;
       process.env.PRODUCT_DATABASE_URL = dynamicDbUrl;
       console.log("pushing Prisma schema to test container...");
-      
+
       execSync("npx prisma migrate dev", {
         env: {
           ...process.env,
@@ -120,7 +119,6 @@ describe("product test", () => {
         },
       );
 
-     
       debeziumContainer = await new GenericContainer(
         "quay.io/debezium/connect@sha256:b9c2e73a8598dccc84ec46932e580b03b96de3db64bc4f47101ff0893da4d91c",
       )
@@ -192,12 +190,12 @@ describe("product test", () => {
       }
       const broker = `${kafkaHost}:${kafkaPort}`;
 
-      console.log("im here")
+      console.log("im here");
       // kafkaclient
       kafkaClient = new Kafka({
         clientId: "shopping-test-service",
         brokers: [broker],
-        logLevel: logLevel.NOTHING
+        logLevel: logLevel.NOTHING,
       });
 
       // prisma client
@@ -207,7 +205,6 @@ describe("product test", () => {
       // express app
       const appModule = await import("../app.js");
       app = appModule.default;
-
 
       // importing grpc server
       serverConfig = await import("../grpc/grpc-server.js");
@@ -226,8 +223,6 @@ describe("product test", () => {
         "127.0.0.1:40098",
         grpc.credentials.createInsecure(),
       );
-
-
     },
     50 * 60 * 1000,
   );

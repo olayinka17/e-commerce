@@ -74,11 +74,9 @@ describe("inventory test", () => {
         .withNetworkAliases("kafka-broker")
         .start();
 
-
       const kafkaPort = kafkaContainer.getMappedPort(9093);
       const kafkaHost = kafkaContainer.getHost();
       const kafkaName = kafkaContainer.getName();
-
 
       // starting PostgreSql with Logical replication enabled
       postgresqlContainer = await new PostgreSqlContainer("postgres:18-alpine")
@@ -88,9 +86,7 @@ describe("inventory test", () => {
         .withUsername("postgres")
         .withPassword("password")
         .start();
-      
 
-      
       const dynamicDbUrl = `postgresql://postgres:password@${postgresqlContainer.getHost()}:${postgresqlContainer.getMappedPort(5432)}/inventory`;
       process.env.INVENTORY_DATABASE_URL = dynamicDbUrl;
       console.log("pushing Prisma schema to test container...");
@@ -104,10 +100,9 @@ describe("inventory test", () => {
       console.log("Prisma schema synchronized successfully");
 
       const broker = `${kafkaHost}:${kafkaPort}`;
-      
+
       // creating kafka topics
       for (const topic of Topic_config) {
-        
         execSync(
           `docker exec ${kafkaName} /usr/bin/kafka-topics \
             --create \

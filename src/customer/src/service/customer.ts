@@ -55,7 +55,7 @@ export const signUpService = async ({
   const redisKey: string = `customer-service:OTP:${email}`;
 
   await redis.set(redisKey, bcrypt.hashSync(otp.toString()), "EX", 300);
-  await sendUserEmail(email, otp);
+  if (process.env.NODE_ENV !== "test") await sendUserEmail(email, otp);
   console.log(`OTP for ${email}: ${otp}`); // For testing purposes only, remove in production
 
   return { message: "OTP sent successfully" };
@@ -155,11 +155,13 @@ export const resendOtpService = async (
     await redis.set(redisKey, bcrypt.hashSync(otpTosend), "EX", 300);
   }
 
-  //email service
-  if (is_reset) {
-    await sendResetEmail(email, Number(otpTosend));
-  } else {
-    await sendUserEmail(email, Number(otpTosend));
+  if (process.env.NODE_ENV !== "test") {
+    //email service
+    if (is_reset) {
+      await sendResetEmail(email, Number(otpTosend));
+    } else {
+      await sendUserEmail(email, Number(otpTosend));
+    }
   }
 
   return { message: "OTP sent successfully" };
@@ -201,7 +203,7 @@ export const forgotPasswordService = async (email: string): Promise<object> => {
 
   await redis.set(redisKey, bcrypt.hashSync(otp.toString()), "EX", 300);
 
-  await sendResetEmail(email, otp);
+  if (process.env.NODE_ENV !== "test") await sendResetEmail(email, otp);
   console.log(`OTP for ${email}: ${otp}`); // For testing purposes only, remove in production
   return { message: "OTP sent successfully" };
 };

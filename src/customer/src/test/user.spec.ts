@@ -14,7 +14,7 @@ describe("user endpoints", () => {
   let redisContainer: any;
   let prisma: PrismaClient;
   let app: any;
-  let redis: any
+  let redis: any;
   beforeAll(async () => {
     // Initializing shared Docker network
     network = await new Network().start();
@@ -38,7 +38,7 @@ describe("user endpoints", () => {
     process.env.CUSTOMER_DATABASE_URL = dynamicDbUrl;
 
     console.log("pushing Prisma schema to test container...");
-   // console.log(process.env["CUSTOMER_DATABASE_URL"]);
+    // console.log(process.env["CUSTOMER_DATABASE_URL"]);
     try {
       execSync("npx prisma migrate dev", {
         env: {
@@ -54,9 +54,9 @@ describe("user endpoints", () => {
     const prismaModule = await import("../utils/prisma.js");
     prisma = prismaModule.prisma;
 
-    const redisModule = await import("../utils/redis.js")
-    redis = redisModule.redis
-    
+    const redisModule = await import("../utils/redis.js");
+    redis = redisModule.redis;
+
     const hashedPassword = bcrypt.hashSync("123456789", 10);
     await prisma.user.create({
       data: {
@@ -71,11 +71,10 @@ describe("user endpoints", () => {
     // importing express app after setting up Redis environment variables
     const appModule = await import("../app.js");
     app = appModule.default;
-
   }, 60000);
 
   afterAll(async () => {
-    if (redis) await redis.quit()
+    if (redis) await redis.quit();
     await prisma.user.deleteMany();
     if (postgresqlContainer) await postgresqlContainer.stop();
     if (redisContainer) await redisContainer.stop();
@@ -120,7 +119,7 @@ describe("user endpoints", () => {
     expect(response.body.data).toHaveProperty("user");
 
     const Otpcode: string = String(await redis.get(redisKey));
-    
+
     expect(Otpcode).toBe("null");
   });
 

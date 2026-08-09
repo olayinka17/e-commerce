@@ -82,17 +82,16 @@ describe("orchestrator", () => {
     //console.log(process.env.KAFKA_BROKERS)
 
     bootstrap = await import("../bootstrap.js");
-    await bootstrap.bootstrap()
-    
+    await bootstrap.bootstrap();
+
     await new Promise((resolve) => setTimeout(resolve, 30000));
   }, 120000);
 
   afterAll(async () => {
-    if (bootstrap) await bootstrap.shutdown()
+    if (bootstrap) await bootstrap.shutdown();
     if (producer) await producer.disconnect();
     //await bootstrap
     if (kafkaContainer) await kafkaContainer.stop();
-
   }, 80000);
 
   it("should process order created events", async () => {
