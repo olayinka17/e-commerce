@@ -131,7 +131,7 @@ jobs:
         
       - name: Verify image can be pulled
         # shell: bash
-        run: docker pull ${{ inputs.image-name }}:${{ inputs.github-sha }}
+        run: docker pull ${{ secrets.DOCKER_USERNAME }}/${{ inputs.image-name }}:${{ inputs.github-sha }}
 
       - name: Update compose file with new image
         # shell: bash
