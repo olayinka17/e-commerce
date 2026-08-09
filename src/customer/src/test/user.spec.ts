@@ -68,9 +68,11 @@ describe("user endpoints", () => {
       },
     });
 
+    console.log("kakakak")
     // importing express app after setting up Redis environment variables
     const appModule = await import("../app.js");
     app = appModule.default;
+    console.log("hdhdhd")
   }, 60000);
 
   afterAll(async () => {
