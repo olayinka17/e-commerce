@@ -131,7 +131,6 @@ describe("inventory test", () => {
       const prismaModule = await import("../util/prisma.js");
       prisma = prismaModule.prisma;
 
-
       first_order_id = uuidv4();
       second_order_id = uuidv4();
 
@@ -170,9 +169,14 @@ describe("inventory test", () => {
     });
     await waitForExpect(
       async () => {
-        const new_inventory = await prisma.inventory.findFirst({
-          where: { product_id },
-        });
+        let new_inventory: any
+        try {
+          new_inventory = await prisma.inventory.findFirst({
+            where: { product_id },
+          });
+        } catch (err) {
+          console.log(err);
+        }
 
         expect(new_inventory).toBeTruthy();
         expect(new_inventory?.available_quantity).toBe(0);
