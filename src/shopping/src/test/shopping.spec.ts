@@ -15,7 +15,7 @@ import type { ServiceError } from "@grpc/grpc-js";
 import type { sendUnaryData, ServerUnaryCall } from "@grpc/grpc-js";
 import { v4 as uuidv4 } from "uuid";
 import { Topics } from "@enterprise/kafka-common";
-import { bootstrap, shutdown } from "../utils/bootstrap.js";
+//import { bootstrap, shutdown } from "../utils/bootstrap.js";
 
 interface ProductRequest {
   id: string;
@@ -130,6 +130,7 @@ describe("shopping test", () => {
   let order_id: string;
   let redisClient: any;
   let kafkaService: any;
+  let bootstrapModule: any
   beforeAll(
     async () => {
 
@@ -341,7 +342,8 @@ describe("shopping test", () => {
         },
       });
       await bindServer(ProductsServer, "127.0.0.1:40098");
-      await bootstrap();
+      bootstrapModule = await import("../utils/bootstrap.js")
+      await bootstrapModule.bootstrap();
       // importing redis client
       const redisModule = await import("../utils/redis.js");
       redisClient = redisModule.redis;
@@ -354,7 +356,7 @@ describe("shopping test", () => {
       await kafkaService.disconnect();
       await kafkaService.disconnectConsumer();
       await producer.disconnect();
-      await shutdown();
+      await bootstrapModule.shutdown();
       await serverConfig.stopServer();
       if (kafkaContainer) await kafkaContainer.stop();
       if (redisClient) await redisClient.quit();

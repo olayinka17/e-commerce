@@ -7,7 +7,7 @@ import { PostgreSqlContainer } from "@testcontainers/postgresql";
 import { Kafka, logLevel, type Consumer, type Producer } from "kafkajs";
 import { Topics } from "@enterprise/kafka-common";
 import { v4 as uuidv4 } from "uuid";
-import { startServer, stopServer } from "../server.js";
+//import { startServer, stopServer } from "../server.js";
 import type { PrismaClient } from "../generated/prisma/client.js";
 import * as grpc from "@grpc/grpc-js";
 import * as protoloader from "@grpc/proto-loader";
@@ -61,6 +61,7 @@ describe("inventory test", () => {
   let prisma: PrismaClient;
   let first_order_id: string;
   let second_order_id: string;
+  let serverModule: any;
 
   beforeAll(
     async () => {
@@ -135,8 +136,9 @@ describe("inventory test", () => {
       
       first_order_id = uuidv4();
       second_order_id = uuidv4();
+      serverModule = await import('../server.js')
 
-      await startServer(false);
+      await serverModule.startServer(false);
       await new Promise((resolve) => setTimeout(resolve, 100000));
     },
     50 * 60 * 1000,
@@ -149,7 +151,7 @@ describe("inventory test", () => {
       await prisma.inventory_reservation.deleteMany();
       await prisma.inventory_movement.deleteMany();
       await prisma.$disconnect();
-      await stopServer();
+      await serverModule.stopServer();
       if (kafkaContainer) await kafkaContainer.stop();
       if (postgresqlContainer) await postgresqlContainer.stop();
       await network.stop();
