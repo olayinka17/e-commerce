@@ -131,6 +131,7 @@ describe("shopping test", () => {
   let redisClient: any;
   let kafkaService: any;
   let bootstrapModule: any
+
   beforeAll(
     async () => {
 
@@ -194,7 +195,7 @@ describe("shopping test", () => {
 
       // starting debezium container
       debeziumContainer = await new GenericContainer(
-        "quay.io/debezium/connect:3.6",
+        "quay.io/debezium/connect@sha256:b9c2e73a8598dccc84ec46932e580b03b96de3db64bc4f47101ff0893da4d91c",
       )
         .withNetwork(network)
         .withExposedPorts(8083)
@@ -284,9 +285,9 @@ describe("shopping test", () => {
 
       process.env.KAFKA_BROKERS = broker;
 
-      const prismaModule = await import("../utils/prisma.js");
+      // const prismaModule = await import("../utils/prisma.js");
 
-      prisma = prismaModule.prisma;
+      // prisma = prismaModule.prisma;
 
       const kafkaModule = await import("../utils/kafka.js");
       kafkaService = kafkaModule.kafkaService;
@@ -356,7 +357,8 @@ describe("shopping test", () => {
   afterAll(
     async () => {
       console.log("CLEANUP STARTED");
-      await prisma.$disconnect()
+      //await prisma.$disconnect()
+
       if (kafkaService) await kafkaService.disconnectConsumer();
       if (kafkaService) await kafkaService.disconnect();
       if (producer) await producer.disconnect();
@@ -371,6 +373,7 @@ describe("shopping test", () => {
       await serverConfig.stopServer();
       await network.stop();
       console.log("CLEANUP FINISHED");
+      
     },
     50 * 60 * 1000,
   );
