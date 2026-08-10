@@ -343,6 +343,7 @@ describe("shopping test", () => {
         },
       });
       await bindServer(ProductsServer, "127.0.0.1:40098");
+
       bootstrapModule = await import("../utils/bootstrap.js")
       await bootstrapModule.bootstrap();
       // importing redis client
@@ -354,9 +355,9 @@ describe("shopping test", () => {
 
   afterAll(
     async () => {
-      await kafkaService.disconnectConsumer();
-      await kafkaService.disconnect();
-      await producer.disconnect();
+      if (kafkaService) await kafkaService.disconnectConsumer();
+      if (kafkaService) await kafkaService.disconnect();
+      if (producer) await producer.disconnect();
       if (kafkaContainer) await kafkaContainer.stop();
       if (redisClient) await redisClient.quit();
       if (AdminClient) AdminClient.close();
