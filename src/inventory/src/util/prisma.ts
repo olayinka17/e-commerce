@@ -17,7 +17,7 @@ function getSecret(secretName: string) {
 }
 
 const connectionString = getSecret("INVENTORY_DATABASE_URL") as string
-
+console.log(connectionString)
 const adapter = new PrismaPg({ connectionString})
 const prisma = new PrismaClient( { adapter })
 
