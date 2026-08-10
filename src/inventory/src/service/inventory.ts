@@ -36,7 +36,7 @@ export class InventoryService {
   }
 
   async createInventory(product_id: string, event_id: string) {
-    console.log("oooo")
+    //console.log("oooo")
     return await this.prisma.$transaction(async (tx) => {
       await tx.inventory.create({
         data: {

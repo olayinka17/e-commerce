@@ -353,6 +353,9 @@ describe("shopping test", () => {
     async () => {
       await kafkaService.disconnect();
       await kafkaService.disconnectConsumer();
+      await producer.disconnect();
+      await shutdown();
+      await serverConfig.stopServer();
       if (kafkaContainer) await kafkaContainer.stop();
       if (redisClient) await redisClient.quit();
       if (ProductsServer) ProductsServer.forceShutdown();
@@ -360,10 +363,7 @@ describe("shopping test", () => {
       if (postgresqlContainer) await postgresqlContainer.stop();
       if (debeziumContainer) await debeziumContainer.stop();
       if (redisContainer) await redisContainer.stop();
-      await producer.disconnect();
       await network.stop();
-      await shutdown();
-      await serverConfig.stopServer();
     },
     50 * 60 * 1000,
   );

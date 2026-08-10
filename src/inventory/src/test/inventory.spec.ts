@@ -91,7 +91,7 @@ describe("inventory test", () => {
       process.env.INVENTORY_DATABASE_URL = dynamicDbUrl;
       console.log("pushing Prisma schema to test container...");
       console.log(process.env.INVENTORY_DATABASE_URL);
-      execSync("npx prisma db push", {
+      execSync("npx prisma migrate dev", {
         env: {
           ...process.env,
         },
@@ -131,6 +131,7 @@ describe("inventory test", () => {
       const prismaModule = await import("../util/prisma.js");
       prisma = prismaModule.prisma;
 
+
       first_order_id = uuidv4();
       second_order_id = uuidv4();
 
@@ -143,14 +144,14 @@ describe("inventory test", () => {
   afterAll(
     async () => {
       if (producer) await producer.disconnect();
-      if (kafkaContainer) await kafkaContainer.stop();
-      if (postgresqlContainer) await postgresqlContainer.stop();
       await prisma.inventory.deleteMany();
       await prisma.inventory_reservation.deleteMany();
       await prisma.inventory_movement.deleteMany();
       await prisma.$disconnect();
-      await network.stop();
       await stopServer();
+      if (kafkaContainer) await kafkaContainer.stop();
+      if (postgresqlContainer) await postgresqlContainer.stop();
+      await network.stop();
     },
     50 * 60 * 1000,
   );
