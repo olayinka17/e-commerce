@@ -132,6 +132,7 @@ describe("shopping test", () => {
   let kafkaService: any;
   beforeAll(
     async () => {
+
       // Initializing shared Docker network
       network = await new Network().start();
 
@@ -190,7 +191,7 @@ describe("shopping test", () => {
         },
       );
 
-      // starting sebezium container
+      // starting debezium container
       debeziumContainer = await new GenericContainer(
         "quay.io/debezium/connect:3.6",
       )
@@ -257,7 +258,7 @@ describe("shopping test", () => {
       });
 
       const broker = `${kafkaHost}:${kafkaPort}`;
-
+      // kafka topics
       for (const topic of Topic_config) {
         execSync(
           `docker exec ${kafkaName} /usr/bin/kafka-topics \

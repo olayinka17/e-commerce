@@ -149,6 +149,7 @@ describe("admin service", () => {
   let redisClient: any;
 
   beforeAll(async () => {
+
     // Starting Redis container
     redisContainer = await new RedisContainer("redis:7-alpine").start();
     process.env.REDIS_HOST = redisContainer.getHost();
@@ -158,7 +159,7 @@ describe("admin service", () => {
     const appModule = await import("../app.js");
     app = appModule.default;
 
-    //// Setting up gRPC servers
+    // Setting up gRPC servers
     shopping_server = new grpc.Server();
     shopping_server.addService(AdminPackage.Admin.service, {
       totalOrders: (
@@ -295,6 +296,7 @@ describe("admin service", () => {
     // importing redisclient
     const redisModule = await import("../utils/redis.js");
     redisClient = redisModule.redis;
+    
   }, 10000);
 
   afterAll(async () => {

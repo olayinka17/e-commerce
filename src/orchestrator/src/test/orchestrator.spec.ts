@@ -79,7 +79,7 @@ describe("orchestrator", () => {
 
     process.env.KAFKA_BROKERS = broker;
 
-    //console.log(process.env.KAFKA_BROKERS)
+    console.log(process.env.KAFKA_BROKERS)
 
     bootstrap = await import("../bootstrap.js");
     await bootstrap.bootstrap();

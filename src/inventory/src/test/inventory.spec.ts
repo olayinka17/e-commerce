@@ -90,7 +90,7 @@ describe("inventory test", () => {
       const dynamicDbUrl = `postgresql://postgres:password@${postgresqlContainer.getHost()}:${postgresqlContainer.getMappedPort(5432)}/inventory`;
       process.env.INVENTORY_DATABASE_URL = dynamicDbUrl;
       console.log("pushing Prisma schema to test container...");
-      // console.log(process.env.INVENTORY_DATABASE_URL);
+      console.log(process.env.INVENTORY_DATABASE_URL);
       execSync("npx prisma db push", {
         env: {
           ...process.env,
