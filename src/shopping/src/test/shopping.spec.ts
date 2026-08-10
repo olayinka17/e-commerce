@@ -130,11 +130,10 @@ describe("shopping test", () => {
   let order_id: string;
   let redisClient: any;
   let kafkaService: any;
-  let bootstrapModule: any
+  let bootstrapModule: any;
 
   beforeAll(
     async () => {
-
       // Initializing shared Docker network
       network = await new Network().start();
 
@@ -345,7 +344,7 @@ describe("shopping test", () => {
       });
       await bindServer(ProductsServer, "127.0.0.1:40098");
 
-      bootstrapModule = await import("../utils/bootstrap.js")
+      bootstrapModule = await import("../utils/bootstrap.js");
       await bootstrapModule.bootstrap();
       // importing redis client
       const redisModule = await import("../utils/redis.js");
@@ -359,21 +358,27 @@ describe("shopping test", () => {
       console.log("CLEANUP STARTED");
       //await prisma.$disconnect()
 
-      if (kafkaService) await kafkaService.disconnectConsumer();
-      if (kafkaService) await kafkaService.disconnect();
+      if (kafkaService) {
+        await kafkaService.disconnectConsumer();
+        await kafkaService.disconnect();
+      }
+      // if (kafkaService) await kafkaService.disconnectConsumer();
+      // if (kafkaService) await kafkaService.disconnect();
       if (producer) await producer.disconnect();
-      if (kafkaContainer) await kafkaContainer.stop();
       if (redisClient) await redisClient.quit();
       if (AdminClient) AdminClient.close();
+      if (bootstrapModule) {
+        await bootstrapModule.shutdown();
+      }
       if (ProductsServer) ProductsServer.forceShutdown();
-      if (postgresqlContainer) await postgresqlContainer.stop();
-      if (debeziumContainer) await debeziumContainer.stop();
-      if (redisContainer) await redisContainer.stop();
-      await bootstrapModule.shutdown();
       await serverConfig.stopServer();
-      await network.stop();
+      if (debeziumContainer) await debeziumContainer.stop();
+      if (kafkaContainer) await kafkaContainer.stop();
+      if (postgresqlContainer) await postgresqlContainer.stop();
+      if (redisContainer) await redisContainer.stop();
+      // await bootstrapModule.shutdown();
+      if (network) await network.stop();
       console.log("CLEANUP FINISHED");
-      
     },
     50 * 60 * 1000,
   );
