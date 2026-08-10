@@ -12,12 +12,13 @@ function getSecret(secretName: string) {
   } catch (err) {
     // Fallback to environment variables for local development 
     return process.env[secretName]; 
+    
   }
 }
 
 const connectionString = getSecret("INVENTORY_DATABASE_URL") as string
 
 const adapter = new PrismaPg({ connectionString})
-const prisma = new PrismaClient( { adapter,})
+const prisma = new PrismaClient( { adapter })
 
 export { prisma }

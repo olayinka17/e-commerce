@@ -87,7 +87,7 @@ describe("inventory test", () => {
         .withPassword("password")
         .start();
 
-      const dynamicDbUrl = `postgresql://postgres:password@${postgresqlContainer.getHost()}:${postgresqlContainer.getMappedPort(5432)}/inventory`;
+      const dynamicDbUrl = `postgresql://postgres:password@127.0.0.1:${postgresqlContainer.getMappedPort(5432)}/inventory`;
       process.env.INVENTORY_DATABASE_URL = dynamicDbUrl;
       console.log("pushing Prisma schema to test container...");
       console.log(process.env.INVENTORY_DATABASE_URL);
@@ -131,6 +131,7 @@ describe("inventory test", () => {
       const prismaModule = await import("../util/prisma.js");
       prisma = prismaModule.prisma;
 
+      
       first_order_id = uuidv4();
       second_order_id = uuidv4();
 
@@ -171,6 +172,7 @@ describe("inventory test", () => {
       async () => {
         let new_inventory: any
         try {
+          
           new_inventory = await prisma.inventory.findFirst({
             where: { product_id },
           });
