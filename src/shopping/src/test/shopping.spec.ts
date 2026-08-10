@@ -354,18 +354,18 @@ describe("shopping test", () => {
 
   afterAll(
     async () => {
-      await kafkaService.disconnect();
       await kafkaService.disconnectConsumer();
+      await kafkaService.disconnect();
       await producer.disconnect();
-      await bootstrapModule.shutdown();
-      await serverConfig.stopServer();
       if (kafkaContainer) await kafkaContainer.stop();
       if (redisClient) await redisClient.quit();
-      if (ProductsServer) ProductsServer.forceShutdown();
       if (AdminClient) AdminClient.close();
+      if (ProductsServer) ProductsServer.forceShutdown();
       if (postgresqlContainer) await postgresqlContainer.stop();
       if (debeziumContainer) await debeziumContainer.stop();
       if (redisContainer) await redisContainer.stop();
+      await bootstrapModule.shutdown();
+      await serverConfig.stopServer();
       await network.stop();
     },
     50 * 60 * 1000,
