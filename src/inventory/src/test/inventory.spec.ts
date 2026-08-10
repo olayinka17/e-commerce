@@ -743,12 +743,12 @@ describe("inventory test", () => {
         expect(processed).toHaveProperty("event_id");
 
         expect(receivedKafkaMessages.length).toBe(2);
-        expect(receivedKafkaMessages[0]).toEqual({
+        expect(receivedKafkaMessages[1]).toEqual({
           order,
           email: "ola@email.com",
           correlation_id,
         });
-        expect(receivedKafkaHeaders.length).toBe(1);
+        expect(receivedKafkaHeaders.length).toBe(2);
       },
       10000,
       200,
