@@ -284,9 +284,9 @@ describe("shopping test", () => {
 
       process.env.KAFKA_BROKERS = broker;
 
-      // const prismaModule = await import("../utils/prisma.js");
+      const prismaModule = await import("../utils/prisma.js");
 
-      // prisma = prismaModule.prisma;
+      prisma = prismaModule.prisma;
 
       const kafkaModule = await import("../utils/kafka.js");
       kafkaService = kafkaModule.kafkaService;
@@ -356,7 +356,7 @@ describe("shopping test", () => {
   afterAll(
     async () => {
       console.log("CLEANUP STARTED");
-      //await prisma.$disconnect()
+      await prisma.$disconnect()
 
       if (kafkaService) {
         await kafkaService.disconnectConsumer();
@@ -380,7 +380,7 @@ describe("shopping test", () => {
       if (network) await network.stop();
       console.log("CLEANUP FINISHED");
     },
-    50 * 60 * 1000,
+    3 * 60 * 1000,
   );
 
   it("should add to cart", async () => {

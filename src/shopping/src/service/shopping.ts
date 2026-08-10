@@ -582,7 +582,7 @@ export class ShoppingService {
 
             await subscriber.unsubscribe(channelName);
             await subscriber.quit();
-            console.log(data);
+            //console.log(data);
 
             resolve(data);
           });
