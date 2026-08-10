@@ -300,6 +300,7 @@ describe("shopping test", () => {
       serverConfig = await import("../grpc/grpc-server.js");
       await serverConfig.startGrpcServer();
 
+      //gRPC admin client
       AdminClient = new AdminPackage.Admin(
         "127.0.0.1:40099",
         grpc.credentials.createInsecure(),

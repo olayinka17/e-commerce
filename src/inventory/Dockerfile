@@ -36,7 +36,7 @@ COPY --from=builder /app/packages/kafka-common/dist ./packages/kafka-common/dist
 COPY --from=builder /app/src/inventory/dist ./dist/
 COPY --from=builder /app/src/inventory/prisma ./prisma
 
-COPY --from=builder /app/src/inventory/inventory.proto ./inventory.proto
+COPY --from=builder /app/src/inventory/src/inventory.proto ./inventory.proto
 
 EXPOSE 40100
 CMD ["node", "dist/index.js"]
