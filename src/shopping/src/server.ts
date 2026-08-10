@@ -4,9 +4,11 @@ import "dotenv/config";
 import { kafkaService } from "./utils/kafka.js";
 import { startGrpcServer } from "./grpc/grpc-server.js";
 import { bootstrap } from "./utils/bootstrap.js";
+import { startShoppingEventConsumer } from "./utils/eventHandler.js";
+import { shoppingController } from "./shopping-controller.js";
 
 await kafkaService.connect();
-
+await startShoppingEventConsumer(shoppingController.shoppingService)
 await bootstrap();
 await startGrpcServer();
 

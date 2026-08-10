@@ -293,6 +293,13 @@ describe("shopping test", () => {
 
       await kafkaService.connect();
 
+      const controllerModule = await import("../shopping-controller.js");
+      const eventHandlerModule = await import("../utils/eventHandler.js");
+
+      await eventHandlerModule.startShoppingEventConsumer(
+        controllerModule.shoppingController.shoppingService,
+      );
+
       const appModule = await import("../app.js");
       app = appModule.default;
 
@@ -356,7 +363,7 @@ describe("shopping test", () => {
   afterAll(
     async () => {
       console.log("CLEANUP STARTED");
-      await prisma.$disconnect()
+      await prisma.$disconnect();
 
       if (kafkaService) {
         await kafkaService.disconnectConsumer();

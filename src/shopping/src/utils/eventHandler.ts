@@ -138,3 +138,9 @@ export const subscribeEvent = async (shopping: ShoppingService) => {
     }
   }
 };
+
+let subscriptionStarted: Promise<void> | undefined
+export function startShoppingEventConsumer(shopping: ShoppingService) {
+  subscriptionStarted ??= subscribeEvent(shopping)
+  return subscriptionStarted
+}

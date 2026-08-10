@@ -9,9 +9,9 @@ export class ShoppingController {
   public shoppingService = new ShoppingService();
 
   constructor() {
-    (async () => {
-      await subscribeEvent(this.shoppingService);
-    })();
+    // (async () => {
+    //   await subscribeEvent(this.shoppingService);
+    // })();
   }
 
   // orders
