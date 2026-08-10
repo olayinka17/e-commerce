@@ -662,7 +662,7 @@ describe("inventory test", () => {
     });
     await consumer.connect();
 
-    await consumer.subscribe({ topic: Topics.INVENTORY_RESERVED });
+    await consumer.subscribe({ topic: Topics.INVENTORY_RESERVED, fromBeginning: true });
     const inventory = await prisma.inventory.findMany({
       where: { is_active: true },
     });
@@ -742,7 +742,7 @@ describe("inventory test", () => {
         expect(processed?.event_id).toBe(event_id);
         expect(processed).toHaveProperty("event_id");
 
-        expect(receivedKafkaMessages.length).toBe(1);
+        expect(receivedKafkaMessages.length).toBe(2);
         expect(receivedKafkaMessages[0]).toEqual({
           order,
           email: "ola@email.com",
