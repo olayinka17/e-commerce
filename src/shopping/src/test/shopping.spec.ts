@@ -88,6 +88,12 @@ async function waitForExpect(
   }
 }
 
+async function cleanup(name: string, fn: () => Promise<unknown> | unknown) {
+  console.log(`[cleanup:start] ${name}`);
+  await fn();
+  console.log(`[cleanup:done] ${name}`);
+}
+
 const PROTO_PATH = path.join(process.cwd(), "src/grpc/products.proto");
 const CLIENT_PROTO_PATH = path.join(process.cwd(), "src/grpc/shopping.proto");
 
@@ -386,6 +392,29 @@ describe("shopping test", () => {
       // await bootstrapModule.shutdown();
       if (network) await network.stop();
       console.log("CLEANUP FINISHED");
+      // await cleanup("prisma", () => prisma.$disconnect());
+      // await cleanup("shopping Kafka consumer", () =>
+      //   kafkaService.disconnectConsumer(),
+      // );
+      // await cleanup("shopping Kafka producer", () => kafkaService.disconnect());
+      // await cleanup("test Kafka producer", () => producer.disconnect());
+      // await cleanup("Redis client", () => redisClient.quit());
+      // await cleanup("gRPC product client", () => bootstrapModule.shutdown());
+      // if (ProductsServer) {
+      //   await new Promise<void>((resolve) => {
+      //     ProductsServer.tryShutdown(() => resolve());
+      //   });
+      // }
+      // await cleanup("shopping gRPC server", () => serverConfig.stopServer());
+      // await cleanup("Debezium container", () => debeziumContainer.stop());
+      // await cleanup("Kafka container", () => kafkaContainer.stop());
+      // await cleanup("Postgres container", () => postgresqlContainer.stop());
+      // await cleanup("Redis container", () => redisContainer.stop());
+      // await cleanup("Docker network", () => network.stop());
+      console.log(
+        "Active handles:",
+        process._getActiveHandles().map((handle) => handle.constructor.name),
+      );
     },
     1 * 60 * 1000,
   );
