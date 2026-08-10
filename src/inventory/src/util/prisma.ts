@@ -10,7 +10,7 @@ function getSecret(secretName: string) {
     const secretPath = path.join('/run/secrets', secretName);
     return fs.readFileSync(secretPath, 'utf8').trim();
   } catch (err) {
-    // Fallback to environment variables for local development flexibility
+    // Fallback to environment variables for local development 
     return process.env[secretName]; 
   }
 }

@@ -345,6 +345,7 @@ export const subscribeEvent = async (
                 await inventory.unachive_product(product_id, event_id);
               } else if (outboxType === "PRODUCT_CREATE") {
                 await inventory.createInventory(product_id, event_id);
+                console.log("jdjdjdddd")
               }
             } catch (err: any) {
               const backoff = 1000 * Math.pow(2, attempt + 1);
