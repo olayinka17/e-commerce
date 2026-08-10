@@ -81,6 +81,7 @@ describe("inventory test", () => {
       // starting PostgreSql with Logical replication enabled
       postgresqlContainer = await new PostgreSqlContainer("postgres:18-alpine")
         .withNetwork(network)
+        .withExposedPorts(5432)
         .withNetworkAliases("postgres-db")
         .withDatabase("inventory")
         .withUsername("postgres")
