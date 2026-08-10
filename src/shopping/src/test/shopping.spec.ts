@@ -380,7 +380,7 @@ describe("shopping test", () => {
       if (network) await network.stop();
       console.log("CLEANUP FINISHED");
     },
-    3 * 60 * 1000,
+    1 * 60 * 1000,
   );
 
   it("should add to cart", async () => {
