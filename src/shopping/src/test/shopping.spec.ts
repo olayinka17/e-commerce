@@ -389,13 +389,14 @@ describe("shopping test", () => {
       if (kafkaContainer) await kafkaContainer.stop();
       if (postgresqlContainer) await postgresqlContainer.stop();
       if (redisContainer) await redisContainer.stop();
-      // await bootstrapModule.shutdown();
+      await bootstrapModule.shutdown();
       if (network) await network.stop();
       console.log("CLEANUP FINISHED");
       // await cleanup("prisma", () => prisma.$disconnect());
       // await cleanup("shopping Kafka consumer", () =>
       //   kafkaService.disconnectConsumer(),
       // );
+      // await cleanup("productsSErver", () => ProductsServer.forceShutdown())
       // await cleanup("shopping Kafka producer", () => kafkaService.disconnect());
       // await cleanup("test Kafka producer", () => producer.disconnect());
       // await cleanup("Redis client", () => redisClient.quit());
@@ -411,10 +412,10 @@ describe("shopping test", () => {
       // await cleanup("Postgres container", () => postgresqlContainer.stop());
       // await cleanup("Redis container", () => redisContainer.stop());
       // await cleanup("Docker network", () => network.stop());
-      console.log(
-        "Active handles:",
-        process._getActiveHandles().map((handle) => handle.constructor.name),
-      );
+      // console.log(
+      //   "Active handles:",
+      //   process._getActiveHandles().map((handle) => handle.constructor.name),
+      // );
     },
     1 * 60 * 1000,
   );

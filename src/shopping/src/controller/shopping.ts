@@ -3,7 +3,7 @@ import type { Request, Response, NextFunction } from "express";
 import { ShoppingService } from "../service/shopping.js";
 import { redis } from "../utils/redis.js";
 
-import { subscribeEvent } from "../utils/eventHandler.js";
+//import { subscribeEvent } from "../utils/eventHandler.js";
 
 export class ShoppingController {
   public shoppingService = new ShoppingService();

@@ -4,7 +4,7 @@ import { prisma } from "./prisma.js";
 import { Topics } from "@enterprise/kafka-common";
 import { ShoppingService } from "../service/shopping.js";
 
-export const subscribeEvent = async (shopping: ShoppingService) => {
+const subscribeEvent = async (shopping: ShoppingService) => {
   try {
     const consumer: Consumer = kafkaService.createConsumer("shopping-service");
     await consumer.connect();
