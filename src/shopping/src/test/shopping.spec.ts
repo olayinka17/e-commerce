@@ -355,6 +355,8 @@ describe("shopping test", () => {
 
   afterAll(
     async () => {
+      console.log("CLEANUP STARTED");
+      await prisma.$disconnect()
       if (kafkaService) await kafkaService.disconnectConsumer();
       if (kafkaService) await kafkaService.disconnect();
       if (producer) await producer.disconnect();
@@ -368,6 +370,7 @@ describe("shopping test", () => {
       await bootstrapModule.shutdown();
       await serverConfig.stopServer();
       await network.stop();
+      console.log("CLEANUP FINISHED");
     },
     50 * 60 * 1000,
   );
@@ -455,7 +458,7 @@ describe("shopping test", () => {
       7000,
       200,
     );
-    await new Promise((resolve) => setTimeout(resolve, 8000));
+    //await new Promise((resolve) => setTimeout(resolve, 8000));
     await consumer.stop();
     await consumer.disconnect();
   }, 17000);
