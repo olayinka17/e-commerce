@@ -658,7 +658,7 @@ describe("inventory test", () => {
 
   it("should process inventory reserve events", async () => {
     const consumer: Consumer = kafkaClient.consumer({
-      groupId: `inventory-service-test${Date.now()}`,
+      groupId: `inventory-service-test:$%-${Date.now()}`,
     });
     await consumer.connect();
 

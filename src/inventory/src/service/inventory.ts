@@ -58,6 +58,7 @@ export class InventoryService {
   }
 
   async manageOrder(order_id: string, items: Cart_itemsI[], event_id: string) {
+    console.log("jjjfjfjfj")
     const sortedItems = [...items].sort((a, b) =>
       String(a.product_id).localeCompare(String(b.product_id)),
     );

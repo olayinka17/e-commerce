@@ -61,6 +61,7 @@ export const subscribeEvent = async (
                 payload.order.products,
                 event_id,
               );
+              console.log("lakskskksk")
               const uuid = uuidv4();
               await kafkaService.publish(Topics.INVENTORY_RESERVED, [
                 {
