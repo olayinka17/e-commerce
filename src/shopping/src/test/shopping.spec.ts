@@ -375,15 +375,17 @@ describe("shopping test", () => {
         await kafkaService.disconnectConsumer();
         await kafkaService.disconnect();
       }
-      // if (kafkaService) await kafkaService.disconnectConsumer();
-      // if (kafkaService) await kafkaService.disconnect();
       if (producer) await producer.disconnect();
       if (redisClient) await redisClient.quit();
       if (AdminClient) AdminClient.close();
       if (bootstrapModule) {
         await bootstrapModule.shutdown();
       }
-      if (ProductsServer) ProductsServer.forceShutdown();
+      if (ProductsServer) {
+        await new Promise<void>((resolve) => {
+          ProductsServer.tryShutdown(() => resolve())
+        })
+      }
       await serverConfig.stopServer();
       if (debeziumContainer) await debeziumContainer.stop();
       if (kafkaContainer) await kafkaContainer.stop();
@@ -391,31 +393,7 @@ describe("shopping test", () => {
       if (redisContainer) await redisContainer.stop();
       await bootstrapModule.shutdown();
       if (network) await network.stop();
-      console.log("CLEANUP FINISHED");
-      // await cleanup("prisma", () => prisma.$disconnect());
-      // await cleanup("shopping Kafka consumer", () =>
-      //   kafkaService.disconnectConsumer(),
-      // );
-      // await cleanup("productsSErver", () => ProductsServer.forceShutdown())
-      // await cleanup("shopping Kafka producer", () => kafkaService.disconnect());
-      // await cleanup("test Kafka producer", () => producer.disconnect());
-      // await cleanup("Redis client", () => redisClient.quit());
-      // await cleanup("gRPC product client", () => bootstrapModule.shutdown());
-      // if (ProductsServer) {
-      //   await new Promise<void>((resolve) => {
-      //     ProductsServer.tryShutdown(() => resolve());
-      //   });
-      // }
-      // await cleanup("shopping gRPC server", () => serverConfig.stopServer());
-      // await cleanup("Debezium container", () => debeziumContainer.stop());
-      // await cleanup("Kafka container", () => kafkaContainer.stop());
-      // await cleanup("Postgres container", () => postgresqlContainer.stop());
-      // await cleanup("Redis container", () => redisContainer.stop());
-      // await cleanup("Docker network", () => network.stop());
-      // console.log(
-      //   "Active handles:",
-      //   process._getActiveHandles().map((handle) => handle.constructor.name),
-      // );
+
     },
     1 * 60 * 1000,
   );
