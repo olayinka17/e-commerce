@@ -338,8 +338,7 @@ services:
     deploy:
       replicas: 3
       update_config:
-        parallelis 2:
-          condition: service_healthy
+        parallelism: 2
         delay: 10s
         failure_action: rollback
       restart_policy:
@@ -531,7 +530,7 @@ services:
   redis:
     image: redis:alpine
     deploy:
-      replicas: 2
+      replicas: 3
     networks:
       - ecommerce-network
     volumes:

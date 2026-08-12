@@ -27,4 +27,5 @@ export const TOPIC_CONFIGS = [
     
 ]
 
+// custom type for each topic
 export type Topic = typeof Topics[keyof typeof Topics];
