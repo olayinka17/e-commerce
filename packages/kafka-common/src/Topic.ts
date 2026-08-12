@@ -13,18 +13,18 @@ export const Topics = {
     ORDER_FAILED_RETRY: "order.failed.retry"
 } as const
 
-// export const TOPIC_CONFIGS = [
-//     {
-//         topic: Topics.ORDER_CREATED,
-//         numPartitions: 3,
-//         replicationFactor: 3
-//     },
-//     {
-//         topic: Topics.INVENTORY_RESERVE,
-//         numPartitions: 3,
-//         replicationFactor: 3
-//     }
+export const TOPIC_CONFIGS = [
+    {
+        topic: Topics.ORDER_CREATED,
+        numPartitions: 3,
+        replicationFactor: 3
+    },
+    {
+        topic: Topics.INVENTORY_RESERVE,
+        numPartitions: 3,
+        replicationFactor: 3
+    }
     
-// ]
+]
 
 export type Topic = typeof Topics[keyof typeof Topics];
