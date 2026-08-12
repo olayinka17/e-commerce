@@ -1,4 +1,3 @@
-version: "3.8"
 networks:
   ecommerce-network:
     external: true
@@ -32,7 +31,7 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
       KAFKA_LISTENERS: "CONTROLLER://:9001"
       KAFKA_ADVERTISED_LISTENERS: "CONTROLLER://controller-0:9001"
-      KAKFA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
       KAFKA_CONTROLLER_QUORUM_VOTERS: "1@controller-0:9001,2@controller-1:9002,3@controller-2:9003"
       KAFKA_CONTROLLER_BOOTSTRAP_SERVERS: "controller-0:9001"
       CLUSTER_ID: "GCtgBeRZSsq7wLCsyNtdUg"
@@ -58,7 +57,7 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
       KAFKA_LISTENERS: "CONTROLLER://:9002"
       KAFKA_ADVERTISED_LISTENERS: "CONTROLLER://controller-1:9002"
-      KAKFA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
       KAFKA_CONTROLLER_QUORUM_VOTERS: "1@controller-0:9001,2@controller-1:9002,3@controller-2:9003"
       KAFKA_CONTROLLER_BOOTSTRAP_SERVERS: "controller-1:9002"
       CLUSTER_ID: "GCtgBeRZSsq7wLCsyNtdUg"
@@ -85,7 +84,7 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
       KAFKA_LISTENERS: "CONTROLLER://:9003"
       KAFKA_ADVERTISED_LISTENERS: "CONTROLLER://controller-2:9003"
-      KAKFA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
       KAFKA_CONTROLLER_QUORUM_VOTERS: "1@controller-0:9001,2@controller-1:9002,3@controller-2:9003"
       KAFKA_CONTROLLER_BOOTSTRAP_SERVERS: "controller-2:9003"
       CLUSTER_ID: "GCtgBeRZSsq7wLCsyNtdUg"
@@ -114,7 +113,7 @@ services:
       KAFKA_LISTENERS: "PLAINTEXT://:9092"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT"
       KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://server-0:9092"
-      KAKFA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
       KAFKA_CONTROLLER_QUORUM_VOTERS: "1@controller-0:9001,2@controller-1:9002,3@controller-2:9003"
       # KAFKA_CONTROLLER_BOOTSTRAP-SERVERS: 'controller-0:9003'
       CLUSTER_ID: "GCtgBeRZSsq7wLCsyNtdUg"
@@ -123,12 +122,9 @@ services:
     networks:
       - ecommerce-network
     depends_on:
-      controller-0:
-        condition: service_healthy
-      controller-1:
-        condition: service_healthy
-      controller-2:
-        condition: service_healthy
+      - controller-0
+      - controller-1
+      - controller-2
 
   server-1:
     image: confluentinc/cp-kafka@sha256:997e05f8551c64d1e643baf269237e3bb13808e5909d2b936e8e986226bfc78a
@@ -150,7 +146,7 @@ services:
       KAFKA_LISTENERS: "PLAINTEXT://:9093"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT"
       KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://server-1:9093"
-      KAKFA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
       KAFKA_CONTROLLER_QUORUM_VOTERS: "1@controller-0:9001,2@controller-1:9002,3@controller-2:9003"
       # KAFKA_CONTROLLER_BOOTSTRAP-SERVERS: 'controller-0:9003'
       CLUSTER_ID: "GCtgBeRZSsq7wLCsyNtdUg"
@@ -159,12 +155,9 @@ services:
     networks:
       - ecommerce-network
     depends_on:
-      controller-0:
-        condition: service_healthy
-      controller-1:
-        condition: service_healthy
-      controller-2:
-        condition: service_healthy
+      - controller-0
+      - controller-1
+      - controller-2
   server-2:
     image: confluentinc/cp-kafka@sha256:997e05f8551c64d1e643baf269237e3bb13808e5909d2b936e8e986226bfc78a
     healthcheck:
@@ -185,21 +178,18 @@ services:
       KAFKA_LISTENERS: "PLAINTEXT://:9094"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT"
       KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://server-2:9094"
-      KAKFA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
       KAFKA_CONTROLLER_QUORUM_VOTERS: "1@controller-0:9001,2@controller-1:9002,3@controller-2:9003"
       # KAFKA_CONTROLLER_BOOTSTRAP-SERVERS: 'controller-0:9003'
-      KAFKA_CLUSTER_ID: "GCtgBeRZSsq7wLCsyNtdUg"
+      CLUSTER_ID: "GCtgBeRZSsq7wLCsyNtdUg"
     volumes:
       - server2-data:/var/lib/kafka/data
     networks:
       - ecommerce-network
     depends_on:
-      controller-0:
-        condition: service_healthy
-      controller-1:
-        condtion: service_healthy
-      controller-2:
-        condition: service_healthy
+      - controller-0
+      - controller-1
+      - controller-2
 
   server-3:
     image: confluentinc/cp-kafka@sha256:997e05f8551c64d1e643baf269237e3bb13808e5909d2b936e8e986226bfc78a
@@ -222,20 +212,17 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT"
       KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://server-3:9095"
       KAFKA_CONTROLLER_QUORUM_VOTERS: "1@controller-0:9001,2@controller-1:9002,3@controller-2:9003"
-      KAKFA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
       # KAFKA_CONTROLLER_BOOTSTRAP-SERVERS: 'controller-0:9003'
-      KAFKA_CLUSTER_ID: "GCtgBeRZSsq7wLCsyNtdUg"
+      CLUSTER_ID: "GCtgBeRZSsq7wLCsyNtdUg"
     volumes:
       - server3-data:/var/lib/kafka/data
     networks:
       - ecommerce-network
     depends_on:
-      controller-0:
-        condition: service_healthy
-      controller-1:
-        condition: service_healthy
-      controller-2:
-        condition: service_healthy
+      - controller-0
+      - controller-1
+      - controller-2
 
   init-kafka:
     image: confluentinc/cp-kafka@sha256:997e05f8551c64d1e643baf269237e3bb13808e5909d2b936e8e986226bfc78a
@@ -243,14 +230,10 @@ services:
       - ./create_kafka_topics.sh:/etc/confluent/docker/create_kafka_topics.sh:ro
     command: ["/bin/bash", "/etc/confluent/docker/create_kafka_topics.sh"]
     depends_on:
-      server-0:
-        condition: service_healthy
-      server-1:
-        condition: service_healthy
-      server-2:
-        condition: service_healthy
-      server-3:
-        condition: service_healthy
+      - server-0
+      - server-1
+      - server-2
+      - server-3
     networks:
       - ecommerce-network
     
@@ -289,16 +272,11 @@ services:
     ports:
       - "8083:8083"
     depends_on:
-      server-0:
-        condition: service_healthy
-      server-1:
-        condition: service_healthy
-      server-2:
-        condition: service_healthy
-      server-3:
-        condition: service_healthy
-      postgresdb:
-        condition: service_healthy
+      - server-0
+      - server-1
+      - server-2
+      - server-3
+      - postgresdb
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8083/connectors/ || exit 1"]
       interval: 30s
@@ -323,18 +301,12 @@ services:
   admin:
     image: olayinka17/ecommerce-admin:latest
     depends_on:
-      server-0:
-        service_healthy
-      server-1:
-        service_healthy
-      server-2:
-        service_healthy
-      server-3:
-        service_healthy
-      postgresdb:
-        service_healthy
-      redis:
-        service_healthy
+      - server-0
+      - server-1
+      - server-2
+      - server-3
+      - postgresdb
+      - redis
     deploy:
       replicas: 3
       update_config:
@@ -351,27 +323,21 @@ services:
     environment:
       PORT: 4092
       NODE_ENV: production
-      SHOPPING_CLIENT: "localhost"
-      INVENTORY_CLIENT: "localhost"
-      PRODUCT_CLIENT: "localhost"
+      SHOPPING_CLIENT: "shopping"
+      INVENTORY_CLIENT: "inventory"
+      PRODUCT_CLIENT: "product"
       REDIS_HOST: "redis"
       REDIS_PORT: 6379
 
   customer:
     image: olayinka17/ecommerce-customer:latest
     depends_on:
-      server-0:
-        condition: service_healthy
-      server-1:
-        condition: service_healthy
-      server-2:
-        condition: service_healthy
-      server-3:
-        condition: service_healthy
-      postgresdb:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - server-0
+      - server-1
+      - server-2
+      - server-3
+      - postgresdb
+      - redis
     deploy:
       replicas: 3
       update_config:
@@ -396,18 +362,12 @@ services:
   inventory:
     image: olayinka17/ecommerce-inventory:latest
     depends_on:
-      server-0:
-        condition: service_healthy
-      server-1:
-        condition: service_healthy
-      server-2:
-        condition: service_healthy
-      server-3:
-        condition: service_healthy
-      postgresdb:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - server-0
+      - server-1
+      - server-2
+      - server-3
+      - postgresdb
+      - redis
     deploy:
       replicas: 3
       update_config:
@@ -428,18 +388,12 @@ services:
   orchestrator:
     image: orchestrator
     depends_on:
-      server-0:
-        condition: service_healthy
-      server-1:
-        condition: service_healthy
-      server-2:
-        condition: service_healthy
-      server-3:
-        condition: service_healthy
-      postgresdb:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - server-0
+      - server-1
+      - server-2
+      - server-3
+      - postgresdb
+      - redis
     deploy:
       replicas: 3
       update_config:
@@ -458,18 +412,12 @@ services:
   product:
     image: olayinka17/ecommerce-products:latest
     depends_on:
-      server-0:
-        condition: service_healthy
-      server-1:
-        condition: service_healthy
-      server-2:
-        condition: service_healthy
-      server-3:
-        condition: service_healthy
-      postgresdb:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - server-0
+      - server-1
+      - server-2
+      - server-3
+      - postgresdb
+      - redis
     deploy:
       replicas: 3
       update_config:
@@ -493,18 +441,12 @@ services:
   shopping:
     image: olayinka17/ecommerce-shopping:latest
     depends_on:
-      server-0:
-        condition: service_healthy
-      server-1:
-        condition: service_healthy
-      server-2:
-        condition: service_healthy
-      server-3:
-        condition: service_healthy
-      postgresdb:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - server-0
+      - server-1
+      - server-2
+      - server-3
+      - postgresdb
+      - redis
     deploy:
       replicas: 3
       update_config:
@@ -523,14 +465,14 @@ services:
       NODE_ENV: production
       KAFKA_BROKERS: "server-0:9092,server-1:9093,server-2:9094,server-3:9095"
       GRPC_HOST: "shopping"
-      PRODUCT_CLIENT: "localhost"
+      PRODUCT_CLIENT: "product"
       REDIS_HOST: "redis"
       REDIS_PORT: 6379
 
   redis:
     image: redis:alpine
     deploy:
-      replicas: 3
+      replicas: 1
     networks:
       - ecommerce-network
     volumes:
@@ -539,18 +481,12 @@ services:
   nginx-proxy:
     image: olayinka17/ecommerce-proxy:latest
     depends_on:
-      admin:
-        condition: service_healthy
-      customer:
-        condition: service_healthy
-      inventory:
-        condition: service_healthy
-      orchestrator:
-        condition: service_healthy
-      product:
-        condition: service_healthy
-      shopping:
-        condition: service_healthy
+      - admin
+      - customer
+      - inventory
+      - orchestrator
+      - product
+      - shopping
     ports:
       - target: 80
         published: 80
