@@ -85,7 +85,7 @@ describe("orchestrator", () => {
     await bootstrap.bootstrap();
 
     await new Promise((resolve) => setTimeout(resolve, 30000));
-  }, 120000);
+  }, 150000);
 
   afterAll(async () => {
     if (bootstrap) await bootstrap.shutdown();

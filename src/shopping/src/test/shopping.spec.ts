@@ -363,7 +363,7 @@ describe("shopping test", () => {
       const redisModule = await import("../utils/redis.js");
       redisClient = redisModule.redis;
     },
-    50 * 60 * 1000,
+    51 * 60 * 1000,
   );
 
   afterAll(

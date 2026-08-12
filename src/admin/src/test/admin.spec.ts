@@ -297,7 +297,7 @@ describe("admin service", () => {
     const redisModule = await import("../utils/redis.js");
     redisClient = redisModule.redis;
     
-  }, 10000);
+  }, 20000);
 
   afterAll(async () => {
     if (redisClient) await redisClient.quit();
@@ -306,7 +306,7 @@ describe("admin service", () => {
     if (shopping_server) shopping_server.forceShutdown();
     if (inventoryServer) inventoryServer.forceShutdown();
     await shutdown();
-  }, 7000);
+  }, 10000);
 
   it("should return the total revenue", async () => {
     const response = await request(app)

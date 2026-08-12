@@ -240,7 +240,7 @@ describe("product test", () => {
       await network.stop();
       await serverConfig.stopServer();
     },
-    50 * 60 * 1000,
+    2 * 60 * 1000,
   );
 
   it("should create category", async () => {

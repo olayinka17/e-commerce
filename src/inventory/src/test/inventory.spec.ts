@@ -156,7 +156,7 @@ describe("inventory test", () => {
       if (postgresqlContainer) await postgresqlContainer.stop();
       await network.stop();
     },
-    50 * 60 * 1000,
+    2 * 60 * 1000,
   );
 
   it("should process product created outbox event", async () => {
