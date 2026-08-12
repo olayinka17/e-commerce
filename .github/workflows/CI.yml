@@ -117,6 +117,9 @@ jobs:
     #     shell: bash
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Initialize Docker Swarm if not already
         shell: bash
         run: |

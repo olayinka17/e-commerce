@@ -385,8 +385,8 @@ services:
       KAFKA_BROKERS: "server-0:9092,server-1:9093,server-2:9094,server-3:9095"
       GRPC_HOST: "inventory"
 
-  orchestrator:
-    image: orchestrator
+  orchestrator: 
+    image: olayinka17/ecommerce-orchestrator:latest
     depends_on:
       - server-0
       - server-1
