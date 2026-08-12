@@ -1,6 +1,6 @@
 name: Build and Deploy
 
-on: 
+on:
   push:
     branches:
       - main
@@ -9,9 +9,8 @@ permissions:
   contents: read
   packages: write
 
-
 jobs:
-  changes: 
+  changes:
     runs-on: self-hosted
     # defaults:
     #   run:
@@ -25,7 +24,7 @@ jobs:
       # product: ${{ steps.filter.outputs.product }}
       # shopping: ${{ steps.filter.outputs.shopping }}
       # kafka-package: ${{ steps.filter.outputs.kafka-package }}
-  
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -56,7 +55,7 @@ jobs:
             proxy:
               - 'proxy/**'
             # kafka-package: 'packages/kafka-common'
-        
+
       - id: set-services
         # shell: bash
         run: |
@@ -101,7 +100,7 @@ jobs:
     uses: ./.github/workflows/build_ci.yml
     with:
       service-name: ${{ matrix.service }}
-      node-version: '24'    
+      node-version: "24"
       image-name: ecommerce-${{ matrix.service }}
       stack-name: ecommerce
       github-sha: ${{ github.sha }}
@@ -109,15 +108,17 @@ jobs:
     strategy:
       matrix:
         service: ${{ fromJSON(needs.changes.outputs.services) }}
-  
+
   deploy-to-docker-swarm:
-    needs: build-and-test-services
+    needs: [build-and-test-services, changes]
     runs-on: self-hosted
     # defaults:
     #   run:
     #     shell: bash
-    steps: 
+
+    steps:
       - name: Initialize Docker Swarm if not already
+        shell: bash
         run: |
           export DOCKER_HOST="ssh://ubuntu@${{ secrets.SWARM_MANAGER_IP }}"
           if ! docker node ls > /dev/null 2>&1; then
@@ -125,7 +126,7 @@ jobs:
           fi
 
       - name: Ensure Docker secrets exist
-        # shell: bash
+        shell: bash
         run: |
           create_secret () {
           NAME=$1
@@ -144,13 +145,20 @@ jobs:
           create_secret SHOPPING_DATABASE_URL "${{ secrets.SHOPPING_DATABASE_URL }}"
           create_secret PAYSTACK_SECRET_KEY "${{ secrets.PAYSTACK_SECRET_KEY }}"
 
+      # - name: Update compose file with new image
+      #   shell: bash
+      #   run: |
+      #     sed -i  "s|image: ${{ service-name }}|image: ${{ secrets.DOCKER_USERNAME }}/${{ inputs.image-name }}:${{ inputs.github-sha }}|g" docker-compose.yml
+
       - name: Deploy to Docker Swarm
+        shell: bash
         run: |
           export DOCKER_HOST="ssh://ubuntu@${{ secrets.SWARM_MANAGER_IP }}"
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
           docker stack deploy --with-registry-auth -c docker-compose.yml ecommerce
-      
+
       - name: Verify services are running
+        shell: bash
         run: |
           export DOCKER_HOST="ssh://ubuntu@${{ secrets.SWARM_MANAGER_IP }}"
           docker stack services ecommerce
-      
